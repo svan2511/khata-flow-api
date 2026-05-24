@@ -3,18 +3,23 @@ set -e
 
 echo "Starting Laravel entrypoint on Render (SQLite)..."
 
-# SQLite ke liye DB wait skip kar sakte ho
+# SQLite setup
 echo "Using SQLite - No TCP database server to wait for."
 
-# Optional: Ensure database directory exists
 mkdir -p database
 touch database/database.sqlite 2>/dev/null || true
 chmod 664 database/database.sqlite 2>/dev/null || true
 
-echo "Running migrations and seeders..."
+echo "Running migrations..."
 php artisan migrate:fresh --force
 
-# Cache clear & optimize
+# Create Passport Personal Client only if not exists
+if ! php artisan tinker --execute="exit(App\Models\OauthPersonalAccessClient::count() > 0 ? 0 : 1);"; then
+  echo "Creating Passport Personal Client..."
+  php artisan passport:client --personal --name="Personal Access Client"
+fi
+
+# Optimize Laravel
 echo "Optimizing Laravel..."
 php artisan optimize:clear
 php artisan config:cache
