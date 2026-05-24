@@ -10,11 +10,6 @@ mkdir -p database
 touch database/database.sqlite 2>/dev/null || true
 chmod 664 database/database.sqlite 2>/dev/null || true
 
-# Clear old caches first
-echo "Clearing Laravel caches..."
-php artisan optimize:clear
-
-# Run migrations
 echo "Running migrations..."
 php artisan migrate:fresh --force
 
@@ -25,11 +20,12 @@ php artisan passport:keys --force
 # Create Passport Personal Client only if not exists
 if ! php artisan tinker --execute="exit(App\Models\OauthPersonalAccessClient::count() > 0 ? 0 : 1);"; then
   echo "Creating Passport Personal Client..."
-  php artisan passport:client --personal --name='Personal Access Client' --no-interaction
+  php artisan passport:client --personal --name="Personal Access Client"
 fi
 
 # Optimize Laravel
 echo "Optimizing Laravel..."
+php artisan optimize:clear
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
