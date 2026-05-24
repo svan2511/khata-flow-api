@@ -10,12 +10,21 @@ mkdir -p database
 touch database/database.sqlite 2>/dev/null || true
 chmod 664 database/database.sqlite 2>/dev/null || true
 
+# Permissions
+chmod -R 775 storage
+chmod -R 775 bootstrap/cache
+
+# Clear old caches
+echo "Clearing Laravel caches..."
+php artisan optimize:clear
+
+# Run migrations
 echo "Running migrations..."
 php artisan migrate:fresh --force
 
-# Generate Passport keys
-echo "Generating Passport keys..."
-php artisan passport:keys --force
+# Install Passport properly
+echo "Installing Passport..."
+php artisan passport:install --force
 
 # Create Passport Personal Client only if not exists
 if ! php artisan tinker --execute="exit(App\Models\OauthPersonalAccessClient::count() > 0 ? 0 : 1);"; then
