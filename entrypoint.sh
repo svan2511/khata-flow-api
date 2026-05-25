@@ -21,9 +21,9 @@ php artisan optimize:clear
 echo "Running migrations..."
 php artisan migrate:fresh --force
 
-# Install Passport
-echo "Installing Passport..."
-php artisan passport:install --force
+# Generate Passport keys only
+echo "Generating Passport keys..."
+php artisan passport:keys --force
 
 # Optimize Laravel
 echo "Optimizing Laravel..."
