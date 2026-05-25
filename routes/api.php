@@ -24,7 +24,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
     Route::get('/user/profile', [UserController::class, 'profile']);
-    Route::put('/user/profile', [UserController::class, 'updateProfile']);
+    Route::match(['put', 'post'], '/user/profile', [UserController::class, 'updateProfile']);
 
     Route::get('/sync/status', [SyncController::class, 'status']);
 
@@ -34,7 +34,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/products/search', [ProductController::class, 'search']);
     Route::post('/products/quick', [ProductController::class, 'quickAdd']);
     Route::get('/products/{uuid}', [ProductController::class, 'show']);
-    Route::put('/products/{uuid}', [ProductController::class, 'update']);
+    Route::match(['put', 'post'], '/products/{uuid}', [ProductController::class, 'update']);
     Route::delete('/products/{uuid}', [ProductController::class, 'destroy']);
 
     // Customers
