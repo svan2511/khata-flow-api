@@ -3,13 +3,15 @@ set -e
 
 echo "Starting Laravel entrypoint on Render (SQLite)..."
 
+# Remove old cached configs
+rm -f bootstrap/cache/*.php
+
 # SQLite setup
 echo "Using SQLite - No TCP database server to wait for."
 
 mkdir -p database
 touch database/database.sqlite 2>/dev/null || true
 chmod 664 database/database.sqlite 2>/dev/null || true
-
 
 # Clear caches
 echo "Clearing Laravel caches..."
