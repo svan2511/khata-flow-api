@@ -120,6 +120,8 @@ class BillingRepository implements BillingRepositoryInterface
 
         $topProducts = $this->getTopProducts($shopId, $startDate, $endDate, 10);
 
+        $totalCredit = (float) $billsQuery->sum('due_amount');
+
         return [
             'month' => "{$year}-{$month}",
             'year' => $year,
@@ -127,6 +129,7 @@ class BillingRepository implements BillingRepositoryInterface
             'total_sales' => $totalSales,
             'total_bills' => $totalBills,
             'average_per_day' => $averagePerDay,
+            'total_credit' => $totalCredit,
             'payment_breakdown' => $paymentBreakdown,
             'top_products' => $topProducts,
         ];

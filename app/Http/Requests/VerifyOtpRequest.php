@@ -28,7 +28,7 @@ class VerifyOtpRequest extends FormRequest
             'otp' => [
                 'required',
                 'string',
-                'size:6',
+                'size:4',
             ],
             'purpose' => [
                 'required',
@@ -44,7 +44,7 @@ class VerifyOtpRequest extends FormRequest
             'phone.required' => 'Phone number is required.',
             'phone.regex' => 'Phone number must be 10-15 digits.',
             'otp.required' => 'OTP is required.',
-            'otp.size' => 'OTP must be 6 digits.',
+            'otp.size' => 'OTP must be 4 digits.',
             'purpose.required' => 'OTP purpose is required.',
         ];
     }

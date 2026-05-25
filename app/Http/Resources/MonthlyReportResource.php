@@ -15,6 +15,7 @@ class MonthlyReportResource extends JsonResource
                 'total_sales' => (float) $this['current_month']['total_sales'],
                 'total_bills' => (int) $this['current_month']['total_bills'],
                 'average_per_day' => (float) $this['current_month']['average_per_day'],
+                'total_credit' => (float) ($this['current_month']['total_credit'] ?? 0),
                 'payment_breakdown' => $this['current_month']['payment_breakdown'],
                 'top_products' => collect($this['current_month']['top_products'])->map(fn ($item) => [
                     'product_name' => $item['product_name'],

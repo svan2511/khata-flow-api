@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class OtpService
 {
-    private const OTP_LENGTH = 6;
+    private const OTP_LENGTH = 4;
 
     private const OTP_EXPIRY_MINUTES = 10;
 
@@ -55,10 +55,6 @@ class OtpService
 
     private function generateOtp(): string
     {
-        if (app()->environment('local', 'testing')) {
-            return '123456';
-        }
-
         $otp = '';
         for ($i = 0; $i < self::OTP_LENGTH; $i++) {
             $otp .= random_int(0, 9);
