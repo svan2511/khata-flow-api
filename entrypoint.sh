@@ -41,6 +41,10 @@ else
     php artisan passport:keys --force
 fi
 
+# Create Personal Access Client (Yeh important hai)
+echo "Creating Personal Access Client..."
+php artisan passport:client --personal --no-interaction --quiet || true
+
 # Final Optimizations (After keys are set)
 echo "Caching configurations..."
 php artisan config:cache
