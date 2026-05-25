@@ -19,7 +19,7 @@ php artisan optimize:clear
 
 # Run migrations
 echo "Running migrations..."
-php artisan migrate:fresh --force
+php artisan migrate --force
 
 # Generate Passport keys only
 echo "Generating Passport keys..."
