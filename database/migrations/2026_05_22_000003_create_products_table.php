@@ -35,7 +35,7 @@ return new class extends Migration
             $table->decimal('mrp', 12, 2)->nullable();
             $table->string('unit', 50)->default('piece');
             $table->decimal('stock_quantity', 12, 2)->default(0);
-            $table->decimal('low_stock_threshold', 12, 2)->default(10);
+            $table->decimal('low_stock_threshold', 12, 2);
             $table->string('image')->nullable();
             $table->string('cloudinary_public_id')->nullable();
             $table->boolean('is_active')->default(true);

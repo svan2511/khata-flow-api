@@ -21,6 +21,8 @@ interface BillingRepositoryInterface
 
     public function getMonthlyReport(int $shopId, int $year, int $month): array;
 
+    public function getCustomRangeReport(int $shopId, string $startDate, string $endDate): array;
+
     public function getTopProducts(int $shopId, string $startDate, string $endDate, int $limit = 10): iterable;
 
     public function getPaymentBreakdown(int $shopId, string $startDate, string $endDate): array;

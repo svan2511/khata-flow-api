@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use App\Repositories\Contracts\ShopRepositoryInterface;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -31,7 +32,7 @@ class StockService
             throw new \RuntimeException('Product not found.');
         }
 
-        return DB::transaction(function () use ($product, $dto): Product {
+        return DB::transaction(function () use ($product, $dto, $shop): Product {
             $updateData = [];
 
             $updateData['stock_quantity'] = $product->stock_quantity + $dto->quantity;
@@ -41,6 +42,8 @@ class StockService
             }
 
             $this->productRepository->update($product, $updateData);
+
+            Cache::forget("dashboard:shop:{$shop->id}");
 
             Log::info('Stock In recorded', [
                 'product_id' => $product->id,

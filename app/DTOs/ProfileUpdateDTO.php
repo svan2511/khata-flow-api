@@ -23,19 +23,21 @@ class ProfileUpdateDTO
 
     public static function fromRequest(array $data): self
     {
+        $nullable = fn(mixed $v): ?string => (isset($v) && $v !== '') ? $v : null;
+
         return new self(
-            name: $data['name'] ?? null,
-            email: $data['email'] ?? null,
-            phone: isset($data['phone']) ? preg_replace('/\D/', '', $data['phone']) : null,
+            name: $nullable($data['name'] ?? null),
+            email: $nullable($data['email'] ?? null),
+            phone: isset($data['phone']) && $data['phone'] !== '' ? preg_replace('/\D/', '', $data['phone']) : null,
             avatar: $data['avatar'] ?? null,
             logo: $data['logo'] ?? null,
-            shopName: $data['shop_name'] ?? null,
-            ownerName: $data['owner_name'] ?? null,
-            address: $data['address'] ?? null,
-            city: $data['city'] ?? null,
-            state: $data['state'] ?? null,
-            pincode: $data['pincode'] ?? null,
-            gstin: $data['gstin'] ?? null,
+            shopName: $nullable($data['shop_name'] ?? null),
+            ownerName: $nullable($data['owner_name'] ?? null),
+            address: $nullable($data['address'] ?? null),
+            city: $nullable($data['city'] ?? null),
+            state: $nullable($data['state'] ?? null),
+            pincode: $nullable($data['pincode'] ?? null),
+            gstin: $nullable($data['gstin'] ?? null),
         );
     }
 

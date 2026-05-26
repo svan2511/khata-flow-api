@@ -16,6 +16,7 @@ class BillItemResource extends JsonResource
             'id' => $this->uuid,
             'product_id' => $this->product?->uuid,
             'product_name' => $this->product_name,
+            'unit' => $this->product?->unit,
             'quantity' => (float) $this->quantity,
             'unit_price' => (float) $this->unit_price,
             'discount_type' => $this->discount_type,

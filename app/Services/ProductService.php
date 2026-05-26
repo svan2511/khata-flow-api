@@ -47,6 +47,7 @@ class ProductService
             'price' => $dto->price,
             'unit' => $dto->unit,
             'stock_quantity' => 0,
+            'low_stock_threshold' => $dto->lowStockThreshold,
             'is_active' => true,
         ]);
     }

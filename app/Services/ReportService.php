@@ -26,6 +26,17 @@ class ReportService
         return $this->billingRepository->getDailyReport($shop->id, $reportDate);
     }
 
+    public function customRangeReport(User $user, string $startDate, string $endDate): array
+    {
+        $shop = $this->shopRepository->findByUser($user);
+
+        if (! $shop) {
+            throw new \RuntimeException('Shop not found. Please setup your shop first.');
+        }
+
+        return $this->billingRepository->getCustomRangeReport($shop->id, $startDate, $endDate);
+    }
+
     public function monthlyReport(User $user, ?int $year = null, ?int $month = null): array
     {
         $shop = $this->shopRepository->findByUser($user);

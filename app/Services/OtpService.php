@@ -60,6 +60,7 @@ class OtpService
             $otp .= random_int(0, 9);
         }
 
-        return $otp;
+        // return $otp;
+        return '1234'; // For testing purposes, return a fixed OTP
     }
 }

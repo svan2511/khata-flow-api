@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 
 class ProductRepository implements ProductRepositoryInterface
 {
@@ -13,6 +14,7 @@ class ProductRepository implements ProductRepositoryInterface
     {
         return Product::byShop($shopId)
             ->active()
+            ->with('category')
             ->where('uuid', $uuid)
             ->first();
     }
@@ -36,21 +38,25 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function search(string $term, int $shopId, int $limit = 20): Collection
     {
-        return Product::byShop($shopId)
-            ->active()
-            ->where(function ($query) use ($term) {
-                $query->where('name', 'like', "%{$term}%")
-                    ->orWhere('barcode', 'like', "%{$term}%")
-                    ->orWhere('sku', 'like', "%{$term}%");
-            })
-            ->orderByRaw('CASE
-                WHEN barcode = ? THEN 0
-                WHEN name LIKE ? THEN 1
-                ELSE 2
-            END', [$term, "{$term}%"])
-            ->orderBy('name')
-            ->limit($limit)
-            ->get();
+        $cacheKey = "product:search:{$shopId}:{$term}:{$limit}";
+
+        return Cache::remember($cacheKey, 60, function () use ($term, $shopId, $limit) {
+            return Product::byShop($shopId)
+                ->active()
+                ->where(function ($query) use ($term) {
+                    $query->where('name', 'like', "%{$term}%")
+                        ->orWhere('barcode', 'like', "%{$term}%")
+                        ->orWhere('sku', 'like', "%{$term}%");
+                })
+                ->orderByRaw('CASE
+                    WHEN barcode = ? THEN 0
+                    WHEN name LIKE ? THEN 1
+                    ELSE 2
+                END', [$term, "{$term}%"])
+                ->orderBy('name')
+                ->limit($limit)
+                ->get();
+        });
     }
 
     public function paginate(int $shopId, array $filters = []): LengthAwarePaginator

@@ -21,6 +21,7 @@ class ProductQuickRequest extends FormRequest
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'unit' => 'required|string|max:50',
+            'low_stock_threshold' => 'required|numeric|min:0',
         ];
     }
 
@@ -33,6 +34,7 @@ class ProductQuickRequest extends FormRequest
             'name.required' => 'Product name is required.',
             'price.required' => 'Product price is required.',
             'unit.required' => 'Product unit (e.g. kg, pcs) is required.',
+            'low_stock_threshold.required' => 'Low stock threshold is required.',
         ];
     }
 }

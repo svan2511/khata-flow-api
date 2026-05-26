@@ -37,7 +37,7 @@ class StoreProductDTO
             costPrice: isset($data['cost_price']) ? (float) $data['cost_price'] : null,
             mrp: isset($data['mrp']) ? (float) $data['mrp'] : null,
             stockQuantity: isset($data['stock_quantity']) ? (float) $data['stock_quantity'] : null,
-            lowStockThreshold: isset($data['low_stock_threshold']) ? (float) $data['low_stock_threshold'] : 0,
+            lowStockThreshold: isset($data['low_stock_threshold']) ? (float) $data['low_stock_threshold'] : null,
             image: $data['image'] ?? null,
             isActive: isset($data['is_active']) ? (bool) $data['is_active'] : true,
         );
@@ -61,7 +61,7 @@ class StoreProductDTO
             'cost_price' => $this->costPrice,
             'mrp' => $this->mrp,
             'stock_quantity' => $this->stockQuantity ?? 0,
-            'low_stock_threshold' => $this->lowStockThreshold ?? 0,
+            'low_stock_threshold' => $this->lowStockThreshold,
             'is_active' => $this->isActive ?? true,
         ];
     }

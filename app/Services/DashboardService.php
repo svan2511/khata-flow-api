@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Repositories\Contracts\DashboardRepositoryInterface;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardService
 {
@@ -27,15 +28,19 @@ class DashboardService
             ];
         }
 
-        return [
-            'today_sales' => $this->dashboardRepository->getTodaySales($shop),
-            'total_credit' => $this->dashboardRepository->getTotalCredit($shop),
-            'low_stock_count' => $this->dashboardRepository->getLowStockCount($shop),
-            'today_bills_count' => $this->dashboardRepository->getTodayBillsCount($shop),
-            'today_bills' => $this->dashboardRepository->getTodayBills($shop),
-            'credit_customers' => $this->dashboardRepository->getCreditCustomers($shop, 10),
-            'has_shop' => true,
-        ];
+        $cacheKey = "dashboard:shop:{$shop->id}";
+
+        return Cache::remember($cacheKey, 120, function () use ($shop) {
+            return [
+                'today_sales' => $this->dashboardRepository->getTodaySales($shop),
+                'total_credit' => $this->dashboardRepository->getTotalCredit($shop),
+                'low_stock_count' => $this->dashboardRepository->getLowStockCount($shop),
+                'today_bills_count' => $this->dashboardRepository->getTodayBillsCount($shop),
+                'today_bills' => $this->dashboardRepository->getTodayBills($shop),
+                'credit_customers' => $this->dashboardRepository->getCreditCustomers($shop, 10),
+                'has_shop' => true,
+            ];
+        });
     }
 
     public function getSyncStatus(User $user): array

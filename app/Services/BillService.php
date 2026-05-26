@@ -13,6 +13,7 @@ use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use App\Repositories\Contracts\ShopRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -180,6 +181,8 @@ class BillService
                 $customer->increment('total_credit', $dueAmount);
             }
 
+            Cache::forget("dashboard:shop:{$shop->id}");
+
             Log::info('Bill created', [
                 'bill_number' => $billNumber,
                 'shop_id' => $shop->id,
@@ -267,6 +270,8 @@ class BillService
                 $newCredit = round($bill->customer->total_credit - $dto->amount, 2);
                 $bill->customer->update(['total_credit' => max(0, $newCredit)]);
             }
+
+            Cache::forget("dashboard:shop:{$shop->id}");
 
             Log::info('Payment added to bill', [
                 'bill_number' => $bill->bill_number,

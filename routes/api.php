@@ -57,6 +57,7 @@ Route::middleware('auth:api')->group(function () {
     // Reports
     Route::get('/reports/daily', [ReportController::class, 'daily']);
     Route::get('/reports/monthly', [ReportController::class, 'monthly']);
+    Route::get('/reports/custom-range', [ReportController::class, 'customRange']);
 
     // Expenses
     Route::post('/expenses', [ExpenseController::class, 'store']);

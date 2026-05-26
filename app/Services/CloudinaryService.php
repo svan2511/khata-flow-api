@@ -8,28 +8,47 @@ use Illuminate\Support\Facades\Log;
 
 class CloudinaryService
 {
-    private Cloudinary $cloudinary;
+    private ?Cloudinary $cloudinary = null;
 
-    public function __construct()
+    protected function client(): ?Cloudinary
     {
-        $this->cloudinary = new Cloudinary([
-            'cloud' => [
-                'cloud_name' => config('cloudinary.cloud_name'),
-                'api_key' => config('cloudinary.api_key'),
-                'api_secret' => config('cloudinary.api_secret'),
-            ],
-        ]);
+        if ($this->cloudinary === null) {
+            $cloudName = config('cloudinary.cloud_name');
+            $apiKey = config('cloudinary.api_key');
+            $apiSecret = config('cloudinary.api_secret');
+
+            if (!$cloudName || !$apiKey || !$apiSecret) {
+                return null;
+            }
+
+            $this->cloudinary = new Cloudinary([
+                'cloud' => [
+                    'cloud_name' => $cloudName,
+                    'api_key' => $apiKey,
+                    'api_secret' => $apiSecret,
+                ],
+            ]);
+        }
+
+        return $this->cloudinary;
     }
 
     public function upload(UploadedFile $file, string $folder = 'dukaan-sahayak', array $options = []): ?array
     {
         try {
+            $client = $this->client();
+            if (!$client) {
+                Log::warning('Cloudinary not configured, skipping upload');
+
+                return null;
+            }
+
             $uploadOptions = array_merge([
                 'folder' => $folder,
                 'resource_type' => 'image',
             ], $options);
 
-            $uploaded = $this->cloudinary->uploadApi()->upload(
+            $uploaded = $client->uploadApi()->upload(
                 $file->getRealPath(),
                 $uploadOptions
             );
@@ -53,7 +72,11 @@ class CloudinaryService
     public function delete(string $publicId): bool
     {
         try {
-            $this->cloudinary->uploadApi()->destroy($publicId);
+            $client = $this->client();
+            if (!$client) {
+                return false;
+            }
+            $client->uploadApi()->destroy($publicId);
 
             return true;
         } catch (\Exception $e) {
@@ -68,6 +91,11 @@ class CloudinaryService
 
     public function getImageUrl(string $publicId, array $transformations = []): string
     {
-        return $this->cloudinary->image($publicId)->toUrl();
+        $client = $this->client();
+        if (!$client) {
+            return '';
+        }
+
+        return $client->image($publicId)->toUrl();
     }
 }

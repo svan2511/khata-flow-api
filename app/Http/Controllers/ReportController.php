@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CustomRangeReportResource;
 use App\Http\Resources\DailyReportResource;
 use App\Http\Resources\MonthlyReportResource;
 use App\Services\ReportService;
@@ -29,6 +30,31 @@ class ReportController extends Controller
             Log::error('Daily report failed', ['error' => $e->getMessage()]);
 
             return $this->error($e->getMessage() ?: 'Failed to generate daily report');
+        }
+    }
+
+    public function customRange(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
+            ]);
+
+            $report = $this->reportService->customRangeReport(
+                $request->user(),
+                $request->query('start_date'),
+                $request->query('end_date')
+            );
+
+            return $this->success(
+                new CustomRangeReportResource($report),
+                'Custom range report retrieved successfully'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Custom range report failed', ['error' => $e->getMessage()]);
+
+            return $this->error($e->getMessage() ?: 'Failed to generate custom range report');
         }
     }
 

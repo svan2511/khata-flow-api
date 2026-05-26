@@ -24,7 +24,7 @@ class StoreProductRequest extends FormRequest
             'mrp' => ['nullable', 'numeric', 'min:0'],
             'unit' => ['required', 'string', 'max:50'],
             'stock_quantity' => ['nullable', 'numeric', 'min:0'],
-            'low_stock_threshold' => ['nullable', 'numeric', 'min:0'],
+            'low_stock_threshold' => ['required', 'numeric', 'min:0'],
             'product_category_id' => ['nullable', 'integer', 'exists:product_categories,id'],
             'category_name' => ['nullable', 'string', 'max:255'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
