@@ -375,7 +375,7 @@
                      Join thousands of smart retailers using KhataFlow. Download the latest APK securely and start your free trial today.
                  </p>
 <div class="bg-primary-container border border-outline-variant/20 rounded-xl p-lg w-full max-w-md flex flex-col items-center gap-md shadow-raised">
-<a class="w-full bg-secondary text-on-secondary h-14 rounded-lg font-label-md text-label-md text-[16px] flex items-center justify-center gap-sm hover:bg-secondary/90 transition-colors shadow-soft group" href="{{ url('/download/apk') }}">
+<a class="w-full bg-secondary text-on-secondary h-14 rounded-lg font-label-md text-label-md text-[16px] flex items-center justify-center gap-sm hover:bg-secondary/90 transition-colors shadow-soft group" href="https://github.com/svan2511/khataflow/releases/download/v1.0.0/app.apk" target="_blank" rel="noopener noreferrer">
 <span class="material-symbols-outlined group-hover:animate-bounce">download</span>
                          Download Latest APK
                      </a>
