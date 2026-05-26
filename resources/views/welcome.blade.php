@@ -6,6 +6,7 @@
 <title>{{ config('app.name', 'KhataFlow') }} - Smart Dukaan, Smart Hisaab</title>
 
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="{{ asset('favicon.png') }}" rel="icon" type="image/png"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Lexend:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
