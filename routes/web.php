@@ -7,6 +7,5 @@ Route::get('/', function () {
 });
 
 Route::get('/download/apk', function () {
-    $file = public_path('apk/app.apk');
-    return response()->download($file);
+    return redirect('https://github.com/svan2511/khataflow/releases/download/v1.0.0/app.apk');
 });
