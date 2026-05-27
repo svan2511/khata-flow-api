@@ -24,7 +24,9 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique()->index();
             $table->foreignId('shop_id')->constrained()->cascadeOnDelete()->index();
-            $table->foreignId('product_category_id')->nullable()->constrained('product_categories')->nullOnDelete()->index();
+            $table->unsignedBigInteger('product_category_id')->nullable()->index();
+            $table->foreign('product_category_id', 'products_pcid_foreign')
+                  ->references('id')->on('product_categories')->nullOnDelete();
             $table->string('name');
             $table->string('slug')->index();
             $table->string('sku', 100)->nullable()->index();
