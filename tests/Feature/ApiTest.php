@@ -19,7 +19,7 @@ class ApiTest extends TestCase
 
     private string $phone = '9999999999';
 
-    private string $otpCode = '123456';
+    private string $otpCode = '1234';
 
     protected function setUp(): void
     {
@@ -115,7 +115,7 @@ class ApiTest extends TestCase
 
         $response = $this->postJson('/api/verify-otp', [
             'phone' => $this->phone,
-            'otp' => '000000',
+            'otp' => '0000',
             'purpose' => OtpPurpose::Registration->value,
         ]);
 
@@ -182,6 +182,8 @@ class ApiTest extends TestCase
                 'message',
                 'data' => [
                     'today_sales',
+                    'today_credit',
+                    'today_cash',
                     'total_credit',
                     'low_stock_count',
                     'today_bills_count',

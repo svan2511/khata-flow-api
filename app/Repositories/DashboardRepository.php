@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Bill;
 use App\Models\Customer;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Repositories\Contracts\DashboardRepositoryInterface;
@@ -16,6 +17,21 @@ class DashboardRepository implements DashboardRepositoryInterface
             ->whereDate('created_at', today())
             ->where('payment_status', '!=', 'cancelled')
             ->sum('total');
+    }
+
+    public function getTodayCredit(Shop $shop): float
+    {
+        return (float) Bill::byShop($shop->id)
+            ->whereDate('created_at', today())
+            ->where('payment_status', '!=', 'cancelled')
+            ->sum('due_amount');
+    }
+
+    public function getTodayCash(Shop $shop): float
+    {
+        return (float) Payment::where('shop_id', $shop->id)
+            ->whereDate('payment_date', today())
+            ->sum('amount');
     }
 
     public function getTotalCredit(Shop $shop): float

@@ -33,6 +33,8 @@ class DashboardService
         return Cache::remember($cacheKey, 120, function () use ($shop) {
             return [
                 'today_sales' => $this->dashboardRepository->getTodaySales($shop),
+                'today_credit' => $this->dashboardRepository->getTodayCredit($shop),
+                'today_cash' => $this->dashboardRepository->getTodayCash($shop),
                 'total_credit' => $this->dashboardRepository->getTotalCredit($shop),
                 'low_stock_count' => $this->dashboardRepository->getLowStockCount($shop),
                 'today_bills_count' => $this->dashboardRepository->getTodayBillsCount($shop),

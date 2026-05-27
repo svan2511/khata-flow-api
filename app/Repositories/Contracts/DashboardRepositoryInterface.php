@@ -8,6 +8,10 @@ interface DashboardRepositoryInterface
 {
     public function getTodaySales(Shop $shop): float;
 
+    public function getTodayCredit(Shop $shop): float;
+
+    public function getTodayCash(Shop $shop): float;
+
     public function getTotalCredit(Shop $shop): float;
 
     public function getLowStockCount(Shop $shop): int;
