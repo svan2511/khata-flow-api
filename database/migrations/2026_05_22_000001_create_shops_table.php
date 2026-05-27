@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::create('shops', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete()->index();
+            $table->unsignedBigInteger('user_id')->index('shops_user_id_index');
+            $table->foreign('user_id', 'shops_user_id_foreign')
+                  ->references('id')->on('users')->cascadeOnDelete();
             $table->string('shop_name');
             $table->string('shop_slug')->unique()->index();
             $table->string('owner_name')->nullable();

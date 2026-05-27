@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::create('product_categories', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
+            $table->unsignedBigInteger('shop_id')->index('pc_shop_id_index');
+            $table->foreign('shop_id', 'pc_shop_id_foreign')
+                  ->references('id')->on('shops')->cascadeOnDelete();
             $table->string('name');
             $table->string('slug')->unique()->index();
             $table->text('description')->nullable();
@@ -23,8 +25,10 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
-            $table->unsignedBigInteger('product_category_id')->nullable()->index();
+            $table->unsignedBigInteger('shop_id')->index('products_shop_id_index');
+            $table->foreign('shop_id', 'products_shop_id_foreign')
+                  ->references('id')->on('shops')->cascadeOnDelete();
+            $table->unsignedBigInteger('product_category_id')->nullable()->index('products_pcid_index');
             $table->foreign('product_category_id', 'products_pcid_foreign')
                   ->references('id')->on('product_categories')->nullOnDelete();
             $table->string('name');

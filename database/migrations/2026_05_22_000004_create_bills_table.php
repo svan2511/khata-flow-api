@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
+            $table->unsignedBigInteger('shop_id')->index('customers_shop_id_index');
+            $table->foreign('shop_id', 'customers_shop_id_foreign')
+                  ->references('id')->on('shops')->cascadeOnDelete();
             $table->string('name');
             $table->string('phone', 20)->nullable()->index();
             $table->string('email')->nullable();
@@ -27,9 +29,15 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique()->index();
             $table->string('bill_number', 50)->index();
-            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
-            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete()->index();
+            $table->unsignedBigInteger('shop_id')->index('bills_shop_id_index');
+            $table->foreign('shop_id', 'bills_shop_id_foreign')
+                  ->references('id')->on('shops')->cascadeOnDelete();
+            $table->unsignedBigInteger('user_id')->nullable()->index('bills_user_id_index');
+            $table->foreign('user_id', 'bills_user_id_foreign')
+                  ->references('id')->on('users')->nullOnDelete();
+            $table->unsignedBigInteger('customer_id')->nullable()->index('bills_customer_id_index');
+            $table->foreign('customer_id', 'bills_customer_id_foreign')
+                  ->references('id')->on('customers')->nullOnDelete();
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('discount', 12, 2)->default(0);
             $table->decimal('tax', 12, 2)->default(0);
@@ -50,8 +58,12 @@ return new class extends Migration
         Schema::create('bill_items', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('bill_id')->constrained('bills')->cascadeOnDelete()->index();
-            $table->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete()->index();
+            $table->unsignedBigInteger('bill_id')->index('bill_items_bill_id_index');
+            $table->foreign('bill_id', 'bill_items_bill_id_foreign')
+                  ->references('id')->on('bills')->cascadeOnDelete();
+            $table->unsignedBigInteger('product_id')->nullable()->index('bill_items_product_id_index');
+            $table->foreign('product_id', 'bill_items_product_id_foreign')
+                  ->references('id')->on('products')->nullOnDelete();
             $table->string('product_name');
             $table->decimal('quantity', 12, 2)->default(1);
             $table->decimal('unit_price', 12, 2);
@@ -65,9 +77,15 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('bill_id')->nullable()->constrained('bills')->cascadeOnDelete()->index();
-            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
-            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete()->index();
+            $table->unsignedBigInteger('bill_id')->nullable()->index('payments_bill_id_index');
+            $table->foreign('bill_id', 'payments_bill_id_foreign')
+                  ->references('id')->on('bills')->cascadeOnDelete();
+            $table->unsignedBigInteger('shop_id')->index('payments_shop_id_index');
+            $table->foreign('shop_id', 'payments_shop_id_foreign')
+                  ->references('id')->on('shops')->cascadeOnDelete();
+            $table->unsignedBigInteger('customer_id')->nullable()->index('payments_customer_id_index');
+            $table->foreign('customer_id', 'payments_customer_id_foreign')
+                  ->references('id')->on('customers')->nullOnDelete();
             $table->decimal('amount', 12, 2);
             $table->string('payment_method', 50);
             $table->string('reference', 100)->nullable();
