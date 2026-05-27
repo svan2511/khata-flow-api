@@ -26,7 +26,7 @@ echo "PostgreSQL is up!"
 
 # Run Migrations
 echo "Running database migrations..."
-php artisan migrate --force
+php artisan migrate:fresh --force
 
 # ================== PASSPORT KEYS SETUP ==================
 echo "Setting up Laravel Passport..."
