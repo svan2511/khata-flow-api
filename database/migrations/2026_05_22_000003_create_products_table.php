@@ -12,6 +12,13 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique()->index();
             $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
+            $table->string('name');
+            $table->string('slug')->unique()->index();
+            $table->text('description')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+            $table->softDeletes();
+        });
 
         Schema::create('products', function (Blueprint $table) {
             $table->id();
