@@ -11,19 +11,12 @@ return new class extends Migration
         Schema::create('product_categories', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('shop_id')->constrained()->cascadeOnDelete()->index();
-            $table->string('name');
-            $table->string('slug')->unique()->index();
-            $table->text('description')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-            $table->softDeletes();
-        });
+            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
 
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('shop_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
             $table->unsignedBigInteger('product_category_id')->nullable()->index();
             $table->foreign('product_category_id', 'products_pcid_foreign')
                   ->references('id')->on('product_categories')->nullOnDelete();

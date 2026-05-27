@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('shops', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete()->index();
             $table->string('shop_name');
             $table->string('shop_slug')->unique()->index();
             $table->string('owner_name')->nullable();

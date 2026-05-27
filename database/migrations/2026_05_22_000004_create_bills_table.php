@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('shop_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
             $table->string('name');
             $table->string('phone', 20)->nullable()->index();
             $table->string('email')->nullable();
@@ -27,9 +27,9 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique()->index();
             $table->string('bill_number', 50)->index();
-            $table->foreignId('shop_id')->constrained()->cascadeOnDelete()->index();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete()->index();
-            $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete()->index();
+            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete()->index();
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('discount', 12, 2)->default(0);
             $table->decimal('tax', 12, 2)->default(0);
@@ -50,8 +50,8 @@ return new class extends Migration
         Schema::create('bill_items', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('bill_id')->constrained()->cascadeOnDelete()->index();
-            $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete()->index();
+            $table->foreignId('bill_id')->constrained('bills')->cascadeOnDelete()->index();
+            $table->foreignId('product_id')->nullable()->constrained('products')->nullOnDelete()->index();
             $table->string('product_name');
             $table->decimal('quantity', 12, 2)->default(1);
             $table->decimal('unit_price', 12, 2);
@@ -65,9 +65,9 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->index();
-            $table->foreignId('bill_id')->nullable()->constrained()->cascadeOnDelete()->index();
-            $table->foreignId('shop_id')->constrained()->cascadeOnDelete()->index();
-            $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete()->index();
+            $table->foreignId('bill_id')->nullable()->constrained('bills')->cascadeOnDelete()->index();
+            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
+            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete()->index();
             $table->decimal('amount', 12, 2);
             $table->string('payment_method', 50);
             $table->string('reference', 100)->nullable();

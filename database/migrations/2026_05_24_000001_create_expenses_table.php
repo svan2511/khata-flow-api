@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->foreignId('shop_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('shop_id')->constrained('shops')->cascadeOnDelete()->index();
             $table->string('title');
             $table->decimal('amount', 12, 2);
             $table->string('category', 100)->nullable();
