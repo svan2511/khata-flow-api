@@ -19,10 +19,12 @@ RUN apk update && apk add --no-cache \
     freetype-dev \
     libjpeg-turbo-dev \
     libpng-dev \
+    postgresql-dev \
     netcat-openbsd && \
   docker-php-ext-configure gd --with-freetype --with-jpeg && \
   docker-php-ext-install -j$(nproc) \
     pdo_mysql \
+    pdo_pgsql \
     zip \
     pcntl \
     bcmath \

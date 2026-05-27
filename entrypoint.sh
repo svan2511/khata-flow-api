@@ -8,15 +8,21 @@ echo "========================================"
 # Clear old cached files
 rm -f bootstrap/cache/*.php
 
-# SQLite Setup
-echo "Setting up SQLite..."
-mkdir -p database
-touch database/database.sqlite 2>/dev/null || true
-chmod 664 database/database.sqlite
+
 
 # Clear all caches
 echo "Clearing Laravel caches..."
 php artisan optimize:clear
+
+# Wait for PostgreSQL
+echo "Waiting for PostgreSQL connection..."
+
+until nc -z $DB_HOST $DB_PORT; do
+  echo "PostgreSQL is unavailable - sleeping"
+  sleep 2
+done
+
+echo "PostgreSQL is up!"
 
 # Run Migrations
 echo "Running database migrations..."
