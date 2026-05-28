@@ -283,16 +283,17 @@
 <div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center mb-md group-hover:bg-primary-container transition-colors">
 <span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-primary text-[24px]">flash_on</span>
 </div>
-<h3 class="font-headline-md text-[20px] text-on-surface mb-xs">Super Fast Billing</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Generate receipts in seconds with optimized workflows designed for high-frequency counters.</p>
+                    <h3 class="font-headline-md text-[20px] text-on-surface mb-xs">Super Fast  Billing</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Generate receipts in seconds and share them instantly via WhatsApp. Optimized for high-frequency counters.</p>
 </div>
-<div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-lg shadow-soft hover:shadow-raised transition-shadow group">
-<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center mb-md group-hover:bg-primary-container transition-colors">
-<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-primary text-[24px]">wifi_off</span>
-</div>
-<h3 class="font-headline-md text-[20px] text-on-surface mb-xs">Offline Mode</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Internet down? No problem. Continue billing flawlessly and sync automatically when back online.</p>
-</div>
+                <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-lg shadow-soft hover:shadow-raised transition-shadow group relative overflow-hidden">
+                    <div class="absolute top-3 right-3 bg-error text-on-error font-label-sm text-label-sm px-2 py-0.5 rounded-full text-[11px] font-medium">Coming Soon</div>
+                    <div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center mb-md group-hover:bg-primary-container transition-colors">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-primary text-[24px]">wifi_off</span>
+                    </div>
+                    <h3 class="font-headline-md text-[20px] text-on-surface mb-xs">Offline Mode</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Internet down? No problem. Continue billing flawlessly and sync automatically when back online.</p>
+                </div>
 <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-lg shadow-soft hover:shadow-raised transition-shadow group">
 <div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center mb-md group-hover:bg-primary-container transition-colors">
 <span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-primary text-[24px]">menu_book</span>
@@ -314,13 +315,13 @@
 <h3 class="font-headline-md text-[20px] text-on-surface mb-xs">Daily Reports</h3>
 <p class="font-body-sm text-body-sm text-on-surface-variant">Clear, actionable insights into your daily sales, profits, and top-selling products.</p>
 </div>
-<div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-lg shadow-soft hover:shadow-raised transition-shadow group">
-<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center mb-md group-hover:bg-primary-container transition-colors">
-<span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-primary text-[24px]">share</span>
-</div>
-<h3 class="font-headline-md text-[20px] text-on-surface mb-xs">WhatsApp Bills</h3>
-<p class="font-body-sm text-body-sm text-on-surface-variant">Go paperless. Share professional digital receipts directly to customers via WhatsApp instantly.</p>
-</div>
+                <div class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-lg shadow-soft hover:shadow-raised transition-shadow group">
+                    <div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center mb-md group-hover:bg-primary-container transition-colors">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-on-primary text-[24px]">translate</span>
+                    </div>
+                    <h3 class="font-headline-md text-[20px] text-on-surface mb-xs">Multiple Languages</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Use KhataFlow in Hindi or English. Switch anytime from settings for a comfortable experience.</p>
+                </div>
 </div>
 </div>
 </section>
