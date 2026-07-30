@@ -17,6 +17,7 @@
 # Logs
 *.log
 storage/logs/*
+AGENTS.md
 
 # Testing
 /.phpunit.cache
