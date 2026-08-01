@@ -44,6 +44,7 @@ class StockService
             $this->productRepository->update($product, $updateData);
 
             Cache::forget("dashboard:shop:{$shop->id}");
+            $this->bumpProductCacheVersion($shop->id);
 
             Log::info('Stock In recorded', [
                 'product_id' => $product->id,
@@ -56,5 +57,11 @@ class StockService
 
             return $product->fresh();
         });
+    }
+
+    private function bumpProductCacheVersion(int $shopId): void
+    {
+        $version = (int) Cache::get("product:version:{$shopId}", 0);
+        Cache::put("product:version:{$shopId}", $version + 1, now()->addWeek());
     }
 }

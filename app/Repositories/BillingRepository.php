@@ -68,7 +68,8 @@ class BillingRepository implements BillingRepositoryInterface
 
     public function getDailyReport(int $shopId, string $date): array
     {
-        $cacheKey = "report:daily:{$shopId}:{$date}";
+        $version = (int) Cache::get("report:version:{$shopId}", 0);
+        $cacheKey = "report:daily:{$shopId}:{$version}:{$date}";
 
         return Cache::remember($cacheKey, 300, function () use ($shopId, $date) {
             $billsQuery = Bill::byShop($shopId)
@@ -107,7 +108,8 @@ class BillingRepository implements BillingRepositoryInterface
 
     public function getMonthlyReport(int $shopId, int $year, int $month): array
     {
-        $cacheKey = "report:monthly:{$shopId}:{$year}:{$month}";
+        $version = (int) Cache::get("report:version:{$shopId}", 0);
+        $cacheKey = "report:monthly:{$shopId}:{$version}:{$year}:{$month}";
 
         return Cache::remember($cacheKey, 300, function () use ($shopId, $year, $month) {
             $startDate = sprintf('%d-%02d-01', $year, $month);
@@ -145,7 +147,8 @@ class BillingRepository implements BillingRepositoryInterface
 
     public function getCustomRangeReport(int $shopId, string $startDate, string $endDate): array
     {
-        $cacheKey = "report:custom:{$shopId}:{$startDate}:{$endDate}";
+        $version = (int) Cache::get("report:version:{$shopId}", 0);
+        $cacheKey = "report:custom:{$shopId}:{$version}:{$startDate}:{$endDate}";
 
         return Cache::remember($cacheKey, 300, function () use ($shopId, $startDate, $endDate) {
             $billsQuery = Bill::byShop($shopId)

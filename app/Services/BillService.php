@@ -182,6 +182,8 @@ class BillService
             }
 
             Cache::forget("dashboard:shop:{$shop->id}");
+            $this->bumpReportCacheVersion($shop->id);
+            $this->bumpProductCacheVersion($shop->id);
 
             Log::info('Bill created', [
                 'bill_number' => $billNumber,
@@ -272,6 +274,7 @@ class BillService
             }
 
             Cache::forget("dashboard:shop:{$shop->id}");
+            $this->bumpReportCacheVersion($shop->id);
 
             Log::info('Payment added to bill', [
                 'bill_number' => $bill->bill_number,
@@ -296,6 +299,18 @@ class BillService
         }
 
         return $prefix.'-'.str_pad((string) $sequence, 3, '0', STR_PAD_LEFT);
+    }
+
+    private function bumpReportCacheVersion(int $shopId): void
+    {
+        $version = (int) Cache::get("report:version:{$shopId}", 0);
+        Cache::put("report:version:{$shopId}", $version + 1, now()->addWeek());
+    }
+
+    private function bumpProductCacheVersion(int $shopId): void
+    {
+        $version = (int) Cache::get("product:version:{$shopId}", 0);
+        Cache::put("product:version:{$shopId}", $version + 1, now()->addWeek());
     }
 
     private function calculateDiscountAmount(float $baseAmount, ?string $discountType, ?float $discountValue): float

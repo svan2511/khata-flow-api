@@ -38,7 +38,8 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function search(string $term, int $shopId, int $limit = 20): Collection
     {
-        $cacheKey = "product:search:{$shopId}:{$term}:{$limit}";
+        $version = (int) Cache::get("product:version:{$shopId}", 0);
+        $cacheKey = "product:search:{$shopId}:{$version}:{$term}:{$limit}";
 
         return Cache::remember($cacheKey, 60, function () use ($term, $shopId, $limit) {
             return Product::byShop($shopId)

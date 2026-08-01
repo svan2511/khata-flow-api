@@ -11,6 +11,7 @@ use App\Repositories\Contracts\ProductRepositoryInterface;
 use App\Repositories\Contracts\ShopRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -41,7 +42,7 @@ class ProductService
             throw new \RuntimeException('Shop not found. Please setup your shop first.');
         }
 
-        return $this->productRepository->create([
+        $product = $this->productRepository->create([
             'shop_id' => $shop->id,
             'name' => $dto->name,
             'price' => $dto->price,
@@ -50,6 +51,11 @@ class ProductService
             'low_stock_threshold' => $dto->lowStockThreshold,
             'is_active' => true,
         ]);
+
+        $this->bumpProductCacheVersion($shop->id);
+        Cache::forget("dashboard:shop:{$shop->id}");
+
+        return $product;
     }
 
     public function getProduct(User $user, string $uuid): ?Product
@@ -111,7 +117,12 @@ class ProductService
                 'name' => $dto->name,
             ]);
 
-            return $this->productRepository->create($productData);
+            $product = $this->productRepository->create($productData);
+
+            $this->bumpProductCacheVersion($shop->id);
+            Cache::forget("dashboard:shop:{$shop->id}");
+
+            return $product;
         });
     }
 
@@ -162,7 +173,12 @@ class ProductService
                 'name' => $dto->name ?? $product->name,
             ]);
 
-            return $this->productRepository->update($product, $productData);
+            $updated = $this->productRepository->update($product, $productData);
+
+            $this->bumpProductCacheVersion($shop->id);
+            Cache::forget("dashboard:shop:{$shop->id}");
+
+            return $updated;
         });
     }
 
@@ -180,17 +196,26 @@ class ProductService
             throw new \RuntimeException('Product not found.');
         }
 
-        DB::transaction(function () use ($product): void {
+        DB::transaction(function () use ($product, $shop): void {
             if ($product->cloudinary_public_id) {
                 $this->cloudinaryService->delete($product->cloudinary_public_id);
             }
 
             $this->productRepository->delete($product);
 
+            $this->bumpProductCacheVersion($shop->id);
+            Cache::forget("dashboard:shop:{$shop->id}");
+
             Log::info('Product deleted', [
                 'product_id' => $product->id,
                 'name' => $product->name,
             ]);
         });
+    }
+
+    private function bumpProductCacheVersion(int $shopId): void
+    {
+        $version = (int) Cache::get("product:version:{$shopId}", 0);
+        Cache::put("product:version:{$shopId}", $version + 1, now()->addWeek());
     }
 }
