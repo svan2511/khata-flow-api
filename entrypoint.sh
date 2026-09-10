@@ -25,8 +25,8 @@ done
 echo "PostgreSQL is up!"
 
 # Run Migrations
-echo "Running database migrations..."
-php artisan migrate --force
+# echo "Running database migrations..."
+# php artisan migrate --force
 
 # Seed Restaurant Menu
 echo "Seeding restaurant menu..."
