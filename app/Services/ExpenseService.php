@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Repositories\Contracts\ExpenseRepositoryInterface;
 use App\Repositories\Contracts\ShopRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class ExpenseService
@@ -39,6 +40,10 @@ class ExpenseService
             'title' => $dto->title,
             'amount' => $dto->amount,
         ]);
+
+        // Reports include expense totals, so invalidate cached reports.
+        $version = (int) Cache::get("report:version:{$shop->id}", 0);
+        Cache::put("report:version:{$shop->id}", $version + 1, now()->addWeek());
 
         return $expense;
     }

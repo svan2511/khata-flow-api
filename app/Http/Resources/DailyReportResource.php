@@ -17,6 +17,8 @@ class DailyReportResource extends JsonResource
             'total_paid' => (float) $this['total_paid'],
             'total_due' => (float) $this['total_due'],
             'total_credit' => (float) $this['total_due'],
+            'total_expenses' => (float) ($this['total_expenses'] ?? 0),
+            'net_profit' => (float) ($this['net_profit'] ?? 0),
             'payment_breakdown' => $this['payment_breakdown'],
             'top_products' => collect($this['top_products'])->map(fn ($item) => [
                 'product_name' => $item['product_name'],

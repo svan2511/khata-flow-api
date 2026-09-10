@@ -16,6 +16,8 @@ class MonthlyReportResource extends JsonResource
                 'total_bills' => (int) $this['current_month']['total_bills'],
                 'average_per_day' => (float) $this['current_month']['average_per_day'],
                 'total_credit' => (float) ($this['current_month']['total_credit'] ?? 0),
+                'total_expenses' => (float) ($this['current_month']['total_expenses'] ?? 0),
+                'net_profit' => (float) ($this['current_month']['net_profit'] ?? 0),
                 'payment_breakdown' => $this['current_month']['payment_breakdown'],
                 'top_products' => collect($this['current_month']['top_products'])->map(fn ($item) => [
                     'product_name' => $item['product_name'],
@@ -29,6 +31,8 @@ class MonthlyReportResource extends JsonResource
                 'total_sales' => (float) $this['previous_month']['total_sales'],
                 'total_bills' => (int) $this['previous_month']['total_bills'],
                 'average_per_day' => (float) $this['previous_month']['average_per_day'],
+                'total_expenses' => (float) ($this['previous_month']['total_expenses'] ?? 0),
+                'net_profit' => (float) ($this['previous_month']['net_profit'] ?? 0),
             ],
             'comparison' => [
                 'sales_growth_percentage' => (float) $this['comparison']['sales_growth_percentage'],

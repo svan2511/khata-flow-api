@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Bill;
 use App\Models\BillItem;
+use App\Models\Expense;
 use App\Models\Payment;
 use App\Repositories\Contracts\BillingRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -93,6 +94,8 @@ class BillingRepository implements BillingRepositoryInterface
 
             $topProducts = $this->getTopProducts($shopId, $date, $date, 10);
 
+            $totalExpenses = $this->getTotalExpenses($shopId, $date, $date);
+
             return [
                 'date' => $date,
                 'total_sales' => $totalSales,
@@ -100,6 +103,8 @@ class BillingRepository implements BillingRepositoryInterface
                 'average_bill_value' => $averageBillValue,
                 'total_paid' => $totalPaid,
                 'total_due' => $totalDue,
+                'total_expenses' => $totalExpenses,
+                'net_profit' => round($totalSales - $totalExpenses, 2),
                 'payment_breakdown' => $paymentBreakdown,
                 'top_products' => $topProducts,
             ];
@@ -131,6 +136,8 @@ class BillingRepository implements BillingRepositoryInterface
 
             $topProducts = $this->getTopProducts($shopId, $startDate, $endDate, 10);
 
+            $totalExpenses = $this->getTotalExpenses($shopId, $startDate, $endDate);
+
             return [
                 'month' => "{$year}-{$month}",
                 'year' => $year,
@@ -139,6 +146,8 @@ class BillingRepository implements BillingRepositoryInterface
                 'total_bills' => $totalBills,
                 'average_per_day' => $averagePerDay,
                 'total_credit' => $totalCredit,
+                'total_expenses' => $totalExpenses,
+                'net_profit' => round($totalSales - $totalExpenses, 2),
                 'payment_breakdown' => $paymentBreakdown,
                 'top_products' => $topProducts,
             ];
@@ -170,6 +179,8 @@ class BillingRepository implements BillingRepositoryInterface
             $paymentBreakdown = $this->getPaymentBreakdown($shopId, $startDate, $endDate);
             $topProducts = $this->getTopProducts($shopId, $startDate, $endDate, 10);
 
+            $totalExpenses = $this->getTotalExpenses($shopId, $startDate, $endDate);
+
             return [
                 'start_date' => $startDate,
                 'end_date' => $endDate,
@@ -180,10 +191,20 @@ class BillingRepository implements BillingRepositoryInterface
                 'total_paid' => $totalPaid,
                 'total_due' => $totalDue,
                 'total_credit' => $totalDue,
+                'total_expenses' => $totalExpenses,
+                'net_profit' => round($totalSales - $totalExpenses, 2),
                 'payment_breakdown' => $paymentBreakdown,
                 'top_products' => $topProducts,
             ];
         });
+    }
+
+    public function getTotalExpenses(int $shopId, string $startDate, string $endDate): float
+    {
+        return (float) Expense::byShop($shopId)
+            ->whereDate('expense_date', '>=', $startDate)
+            ->whereDate('expense_date', '<=', $endDate)
+            ->sum('amount');
     }
 
     public function getTopProducts(int $shopId, string $startDate, string $endDate, int $limit = 10): iterable

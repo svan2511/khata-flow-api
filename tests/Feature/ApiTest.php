@@ -271,4 +271,34 @@ class ApiTest extends TestCase
                 'message' => 'Logged out successfully.',
             ]);
     }
+
+    public function test_daily_report_includes_expenses_and_profit(): void
+    {
+        $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);
+        Shop::factory()->create(['user_id' => $user->id]);
+        Passport::actingAs($user);
+
+        $billResponse = $this->postJson('/api/bills', [
+            'items' => [
+                ['product_name' => 'Test Item', 'unit_price' => 100, 'quantity' => 2],
+            ],
+            'payment_method' => 'cash',
+            'paid_amount' => 200,
+        ]);
+        $billResponse->assertStatus(201);
+
+        $expenseResponse = $this->postJson('/api/expenses', [
+            'title' => 'Electricity',
+            'amount' => 50,
+            'expense_date' => today()->toDateString(),
+        ]);
+        $expenseResponse->assertStatus(201);
+
+        $response = $this->getJson('/api/reports/daily');
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.total_sales', 200)
+            ->assertJsonPath('data.total_expenses', 50)
+            ->assertJsonPath('data.net_profit', 150);
+    }
 }
