@@ -203,7 +203,9 @@ class RestaurantMenuSeeder extends Seeder
             Product::updateOrCreate(
                 ['shop_id' => $shopId, 'name' => $name],
                 [
-                    'uuid' => (string) Str::uuid(),
+                    // NOTE: uuid yaha set mat karo — Product model booted() me
+                    // create pe auto-generate karta hai. Har re-run pe uuid
+                    // badalne se app me saved references toot jayenge.
                     'product_category_id' => $categoryIds[$catName],
                     'price' => $price,
                     'mrp' => $price,
