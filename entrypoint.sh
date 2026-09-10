@@ -28,6 +28,11 @@ echo "PostgreSQL is up!"
 echo "Running database migrations..."
 php artisan migrate --force
 
+# Seed Restaurant Menu
+echo "Seeding restaurant menu..."
+php artisan db:seed --class=RestaurantMenuSeeder --force
+
+
 # ================== PASSPORT KEYS SETUP ==================
 echo "Setting up Laravel Passport..."
 
