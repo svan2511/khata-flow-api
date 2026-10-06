@@ -92,7 +92,7 @@ class BillingRepository implements BillingRepositoryInterface
 
             $paymentBreakdown = $this->getPaymentBreakdown($shopId, $date, $date);
 
-            $topProducts = $this->getTopProducts($shopId, $date, $date, 10);
+            $topProducts = $this->getTopProducts($shopId, $date, $date);
 
             $totalExpenses = $this->getTotalExpenses($shopId, $date, $date);
 
@@ -134,7 +134,7 @@ class BillingRepository implements BillingRepositoryInterface
 
             $paymentBreakdown = $this->getPaymentBreakdown($shopId, $startDate, $endDate);
 
-            $topProducts = $this->getTopProducts($shopId, $startDate, $endDate, 10);
+            $topProducts = $this->getTopProducts($shopId, $startDate, $endDate);
 
             $totalExpenses = $this->getTotalExpenses($shopId, $startDate, $endDate);
 
@@ -177,7 +177,7 @@ class BillingRepository implements BillingRepositoryInterface
             $averagePerDay = $daysDiff > 0 ? round($totalSales / $daysDiff, 2) : 0;
 
             $paymentBreakdown = $this->getPaymentBreakdown($shopId, $startDate, $endDate);
-            $topProducts = $this->getTopProducts($shopId, $startDate, $endDate, 10);
+            $topProducts = $this->getTopProducts($shopId, $startDate, $endDate);
 
             $totalExpenses = $this->getTotalExpenses($shopId, $startDate, $endDate);
 
@@ -207,9 +207,9 @@ class BillingRepository implements BillingRepositoryInterface
             ->sum('amount');
     }
 
-    public function getTopProducts(int $shopId, string $startDate, string $endDate, int $limit = 10): iterable
+    public function getTopProducts(int $shopId, string $startDate, string $endDate, ?int $limit = null): iterable
     {
-        return BillItem::select(
+        $query = BillItem::select(
             'bill_items.product_id',
             'bill_items.product_name',
             DB::raw('SUM(bill_items.quantity) as total_quantity'),
@@ -225,10 +225,13 @@ class BillingRepository implements BillingRepositoryInterface
             })
             ->whereNotNull('bill_items.product_id')
             ->groupBy('bill_items.product_id', 'bill_items.product_name', 'products.unit')
-            ->orderByDesc('total_quantity')
-            ->limit($limit)
-            ->get()
-            ->toArray();
+            ->orderByDesc('total_quantity');
+
+        if ($limit !== null) {
+            $query->limit($limit);
+        }
+
+        return $query->get()->toArray();
     }
 
     public function getPaymentBreakdown(int $shopId, string $startDate, string $endDate): array
