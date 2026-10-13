@@ -1,5 +1,9 @@
 <?php
 
+// PHP < 8.4 polyfill for Symfony 8's request_parse_body() (PUT/PATCH body
+// parsing). Must load before Request::capture() below. No-op on PHP 8.4+.
+require __DIR__.'/../app/Support/request_parse_body_polyfill.php';
+
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 
