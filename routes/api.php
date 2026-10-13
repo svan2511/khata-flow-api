@@ -43,7 +43,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/customers/search', [CustomerController::class, 'search']);
     Route::post('/customers/quick', [CustomerController::class, 'quickAdd']);
     Route::get('/customers/{uuid}', [CustomerController::class, 'show']);
-    Route::put('/customers/{uuid}', [CustomerController::class, 'update']);
+    Route::match(['put', 'post'], '/customers/{uuid}', [CustomerController::class, 'update']);
 
     // Bills
     Route::post('/bills', [BillController::class, 'store']);

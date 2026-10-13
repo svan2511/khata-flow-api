@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\OtpPurpose;
+use App\Models\Customer;
 use App\Models\Otp;
 use App\Models\Product;
 use App\Models\Shop;
@@ -300,5 +301,101 @@ class ApiTest extends TestCase
             ->assertJsonPath('data.total_sales', 200)
             ->assertJsonPath('data.total_expenses', 50)
             ->assertJsonPath('data.net_profit', 150);
+    }
+
+    public function test_user_can_update_customer(): void
+    {
+        $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);
+        $shop = Shop::factory()->create(['user_id' => $user->id]);
+        $customer = Customer::factory()->create(['shop_id' => $shop->id]);
+        Passport::actingAs($user);
+
+        $response = $this->putJson('/api/customers/'.$customer->uuid, [
+            'name' => 'Updated Customer',
+            'phone' => '9876543210',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.name', 'Updated Customer')
+            ->assertJsonPath('data.phone', '9876543210');
+
+        $this->assertDatabaseHas('customers', ['uuid' => $customer->uuid, 'name' => 'Updated Customer']);
+    }
+
+    public function test_customer_update_accepts_post_method(): void
+    {
+        $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);
+        $shop = Shop::factory()->create(['user_id' => $user->id]);
+        $customer = Customer::factory()->create(['shop_id' => $shop->id]);
+        Passport::actingAs($user);
+
+        $response = $this->postJson('/api/customers/'.$customer->uuid, [
+            'name' => 'Post Updated',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.name', 'Post Updated');
+    }
+
+    public function test_customer_update_validation_returns_consistent_json(): void
+    {
+        $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);
+        $shop = Shop::factory()->create(['user_id' => $user->id]);
+        $customer = Customer::factory()->create(['shop_id' => $shop->id]);
+        Passport::actingAs($user);
+
+        $response = $this->putJson('/api/customers/'.$customer->uuid, [
+            'name' => '',
+            'phone' => 'bad!!',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('success', false)
+            ->assertJsonStructure(['success', 'message', 'errors']);
+    }
+
+    public function test_customer_update_unknown_id_returns_json_404(): void
+    {
+        $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);
+        Shop::factory()->create(['user_id' => $user->id]);
+        Passport::actingAs($user);
+
+        $response = $this->putJson('/api/customers/00000000-0000-0000-0000-000000000000', [
+            'name' => 'Ghost',
+        ]);
+
+        $response->assertStatus(404)
+            ->assertJsonPath('success', false);
+    }
+
+    public function test_customer_update_rejects_duplicate_phone_with_friendly_message(): void
+    {
+        $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);
+        $shop = Shop::factory()->create(['user_id' => $user->id]);
+        Customer::factory()->create(['shop_id' => $shop->id, 'phone' => '9876543210']);
+        $other = Customer::factory()->create(['shop_id' => $shop->id, 'phone' => '9123456780']);
+        Passport::actingAs($user);
+
+        $response = $this->putJson('/api/customers/'.$other->uuid, [
+            'name' => 'Other Customer',
+            'phone' => '9876543210',
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Another customer with this phone number already exists.');
+    }
+
+    public function test_unknown_api_route_returns_json_not_html(): void
+    {
+        $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);
+        Passport::actingAs($user);
+
+        $response = $this->getJson('/api/does-not-exist');
+
+        $response->assertStatus(404)
+            ->assertJsonPath('success', false);
     }
 }

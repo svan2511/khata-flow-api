@@ -29,8 +29,8 @@ echo "PostgreSQL is up!"
 # php artisan migrate:fresh --force
 
 # Seed Restaurant Menu
-echo "Seeding restaurant menu..."
-php artisan db:seed --class=RestaurantMenuSeeder --force
+# echo "Seeding restaurant menu..."
+# php artisan db:seed --class=RestaurantMenuSeeder --force
 
 
 # ================== PASSPORT KEYS SETUP ==================

@@ -115,6 +115,16 @@ class CustomerService
             throw new \RuntimeException('Customer not found.');
         }
 
+        // Friendly duplicate check (create path already has this).
+        // Without it the DB throws a raw SQL error to the user.
+        if ($dto->phone) {
+            $existing = $this->customerRepository->findByPhone($dto->phone, $shop->id);
+
+            if ($existing && $existing->id !== $customer->id) {
+                throw new \RuntimeException('Another customer with this phone number already exists.');
+            }
+        }
+
         $data = array_filter([
             'name' => $dto->name,
             'phone' => $dto->phone,

@@ -117,7 +117,13 @@ class CustomerController extends Controller
         } catch (\Throwable $e) {
             Log::error('Customer update failed', ['uuid' => $uuid, 'error' => $e->getMessage()]);
 
-            return $this->error($e->getMessage() ?: 'Failed to update customer');
+            $message = $e->getMessage() ?: 'Failed to update customer';
+
+            if (str_contains($message, 'Customer not found')) {
+                return $this->notFound($message);
+            }
+
+            return $this->error($message);
         }
     }
 
