@@ -75,6 +75,7 @@ class RestaurantMenuSeeder extends Seeder
             // ---- INDIAN THALI ----
             ['Veg Thali (Sabji+Dal+Roti+Salad+Rice)', 80, 'Indian Thali'],
             ['Special Thali (Paneer+Dal+4 Roti+Raita+Rice+Salad)', 120, 'Indian Thali'],
+            ['Navratri Thali (Jeera Aalo+Aalo Tamatar +4 Kuttu Puri+Raita+2 Sabud Dana Papad + Salad)', 200, 'Indian Thali'],
 
             // ---- INDIAN MAINCOURSE (Half / Full split) ----
             ['Rajma Chawal Half', 40, 'Indian Maincourse'],
@@ -155,7 +156,7 @@ class RestaurantMenuSeeder extends Seeder
             ['Veg Sezchwan Rice', 120, 'Chinese'],
             ['Jeera Rice', 120, 'Chinese'],
             ['Steam Rice', 100, 'Chinese'],
-            ['Spring Roll', 70, 'Chinese'],
+            ['Spring Roll', 80, 'Chinese'],
 
             // ---- RAITA ----
             ['Vegetable Raita Half', 70, 'Raita'],
