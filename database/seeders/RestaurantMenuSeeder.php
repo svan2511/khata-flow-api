@@ -157,6 +157,7 @@ class RestaurantMenuSeeder extends Seeder
             ['Jeera Rice', 120, 'Chinese'],
             ['Steam Rice', 100, 'Chinese'],
             ['Spring Roll', 80, 'Chinese'],
+            ['Veg Soup', 60, 'Chinese'],
 
             // ---- RAITA ----
             ['Vegetable Raita Half', 70, 'Raita'],
