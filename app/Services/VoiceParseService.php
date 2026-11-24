@@ -203,6 +203,11 @@ class VoiceParseService
     private function callGemini(string $apiKey, VoiceParseDTO $dto, Collection $candidates, Shop $shop): Response
     {
         $model = (string) config('services.gemini.model', 'gemini-3.5-flash-lite');
+        $fallbackModels = collect(explode(',', (string) config('services.gemini.fallback_models', '')))
+            ->map(fn (string $name) => trim($name))
+            ->filter()
+            ->all();
+        $models = array_values(array_unique(array_filter(array_merge([$model], $fallbackModels))));
         $baseUrl = rtrim((string) config('services.gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta'), '/');
         $timeout = (int) config('services.gemini.timeout', 15);
 
@@ -237,26 +242,43 @@ class VoiceParseService
             ],
         ];
 
-        $response = Http::timeout($timeout)
-            ->connectTimeout(5)
-            ->acceptJson()
-            ->withHeaders(['x-goog-api-key' => $apiKey])
-            ->post("{$baseUrl}/models/{$model}:generateContent", $payload);
+        $lastResponse = null;
 
-        if ($response->failed()) {
+        foreach ($models as $candidateModel) {
+            $response = Http::timeout($timeout)
+                ->connectTimeout(5)
+                ->acceptJson()
+                ->withHeaders(['x-goog-api-key' => $apiKey])
+                ->post("{$baseUrl}/models/{$candidateModel}:generateContent", $payload);
+
+            if (! $response->failed()) {
+                if ($candidateModel !== $model) {
+                    Log::info('Gemini voice parse used fallback model', ['model' => $candidateModel]);
+                }
+
+                return $response;
+            }
+
+            $lastResponse = $response;
+
             Log::warning('Gemini voice parse failed', [
+                'model' => $candidateModel,
                 'status' => $response->status(),
                 'body' => Str::limit($response->body(), 500),
             ]);
 
-            $message = $response->status() === 429
-                ? 'Voice service is busy. Please try again in a minute.'
-                : 'Voice service is unavailable. Please try again.';
-
-            throw new VoiceParseException($message, $response->status() === 429 ? 429 : 502);
+            if (! in_array($response->status(), [429, 500, 502, 503, 504], true)) {
+                break;
+            }
         }
 
-        return $response;
+        $status = $lastResponse?->status() ?? 502;
+
+        $message = $status === 429
+            ? 'Voice service is busy. Please try again in a minute.'
+            : 'Voice service is unavailable. Please try again.';
+
+        throw new VoiceParseException($message, $status === 429 ? 429 : 502);
     }
 
     private function decodeResponse(Response $response): array

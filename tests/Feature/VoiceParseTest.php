@@ -281,6 +281,44 @@ class VoiceParseTest extends TestCase
             ->assertJson(['success' => false]);
     }
 
+    public function test_voice_parse_uses_fallback_model_when_primary_is_overloaded(): void
+    {
+        [$user, $shop] = $this->makeShop();
+        Passport::actingAs($user);
+
+        $product = Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'Aashirvaad Atta 5kg',
+            'price' => 250,
+            'unit' => 'kg',
+        ]);
+
+        Http::fake([
+            '*models/gemini-3.5-flash-lite:generateContent' => Http::response([
+                'error' => ['code' => 503, 'message' => 'This model is currently experiencing high demand.'],
+            ], 503),
+            '*models/gemini-3.1-flash-lite:generateContent' => Http::response([
+                'candidates' => [[
+                    'content' => [
+                        'parts' => [['text' => json_encode($this->draft([
+                            'items' => [
+                                ['product_uuid' => $product->uuid, 'spoken_name' => 'aata', 'quantity' => 1, 'unit' => 'kilo', 'confidence' => 0.9],
+                            ],
+                        ]))]],
+                    ],
+                ]],
+            ]),
+        ]);
+
+        $response = $this->postJson('/api/voice/parse', ['transcript' => 'ek kilo aata']);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.source', 'gemini')
+            ->assertJsonPath('data.items.0.product_uuid', $product->uuid);
+
+        Http::assertSentCount(2);
+    }
+
     public function test_voice_parse_requires_gemini_configuration(): void
     {
         [$user] = $this->makeShop();
