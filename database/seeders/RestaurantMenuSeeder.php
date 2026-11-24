@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\Shop;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -11,7 +13,34 @@ class RestaurantMenuSeeder extends Seeder
 {
     public function run(): void
     {
-        $shopId = 1;
+        // Default restaurant shop ka owner. Login ke liye ye phone use karo (OTP 1234).
+        $ownerPhone = '8699700374';
+
+        $owner = User::firstOrCreate(
+            ['phone' => $ownerPhone],
+            [
+                'name' => 'Amit Kumar Sikwal',
+                'phone_verified_at' => now(),
+            ]
+        );
+
+        $shop = Shop::updateOrCreate(
+            ['shop_name' => 'Dev Ratna Diner'],
+            [
+                'user_id' => $owner->id,
+                'owner_name' => 'Amit Kumar Sikwal',
+                'address' => 'Society Area Clement Town behind Sakshi Electrical Dehradun',
+                'city' => 'Dehradun',
+                'state' => 'Uttarakhand',
+                'pincode' => '248002',
+                'is_active' => true,
+            ]
+        );
+
+        $shopId = $shop->id;
+
+        $this->command->info("Default shop ready: {$shop->shop_name} (ID {$shopId})");
+        $this->command->info("Owner: {$shop->owner_name} | Login phone: {$ownerPhone} (OTP 1234)");
 
         // Categories (shop 1 ke liye create/find)
         $categoryNames = [
