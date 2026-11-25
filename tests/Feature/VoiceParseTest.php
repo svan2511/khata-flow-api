@@ -179,6 +179,91 @@ class VoiceParseTest extends TestCase
         $this->assertEquals(0, $response->json('data.items.0.price'));
     }
 
+    public function test_voice_parse_resolves_spoken_alias_when_gemini_leaves_item_unmatched(): void
+    {
+        [$user, $shop] = $this->makeShop();
+        Passport::actingAs($user);
+
+        $tea = Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'Tea',
+            'price' => 20,
+            'unit' => 'plate',
+        ]);
+
+        Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'Masala Tea',
+            'price' => 30,
+            'unit' => 'plate',
+        ]);
+
+        $this->fakeGemini($this->draft([
+            'items' => [
+                ['product_uuid' => '', 'spoken_name' => 'chai', 'quantity' => 2, 'unit' => 'cup', 'confidence' => 0.4],
+            ],
+        ]));
+
+        $response = $this->postJson('/api/voice/parse', ['transcript' => 'do chai']);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.items.0.product_uuid', $tea->uuid)
+            ->assertJsonPath('data.items.0.name', 'Tea')
+            ->assertJsonPath('data.items.0.resolved', true);
+
+        $this->assertEquals(20.0, $response->json('data.items.0.price'));
+        $this->assertEquals(2, $response->json('data.items.0.quantity'));
+    }
+
+    public function test_voice_parse_resolves_hinglish_menu_items_without_uuid(): void
+    {
+        [$user, $shop] = $this->makeShop();
+        Passport::actingAs($user);
+
+        $tea = Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'Tea',
+            'price' => 20,
+            'unit' => 'plate',
+        ]);
+
+        $prantha = Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'Aloo Prantha',
+            'price' => 40,
+            'unit' => 'plate',
+        ]);
+
+        Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'Plain Prantha',
+            'price' => 20,
+            'unit' => 'plate',
+        ]);
+
+        // Gemini matched "parata" but left "chai" unmatched, like the live bug.
+        $this->fakeGemini($this->draft([
+            'items' => [
+                ['product_uuid' => '', 'spoken_name' => '2chai', 'quantity' => 2, 'unit' => 'cup', 'confidence' => 0.5],
+                ['product_uuid' => $prantha->uuid, 'spoken_name' => 'parata', 'quantity' => 2, 'unit' => 'plate', 'confidence' => 0.8],
+            ],
+        ]));
+
+        $response = $this->postJson('/api/voice/parse', [
+            'transcript' => '2 chai aur 2 parata ka bill banao',
+            'language' => 'hi',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonCount(2, 'data.items')
+            ->assertJsonPath('data.items.0.product_uuid', $tea->uuid)
+            ->assertJsonPath('data.items.0.name', 'Tea')
+            ->assertJsonPath('data.items.0.quantity', 2)
+            ->assertJsonPath('data.items.1.product_uuid', $prantha->uuid)
+            ->assertJsonPath('data.items.1.name', 'Aloo Prantha')
+            ->assertJsonPath('data.items.1.quantity', 2);
+    }
+
     public function test_voice_parse_merges_duplicate_catalog_items(): void
     {
         [$user, $shop] = $this->makeShop();

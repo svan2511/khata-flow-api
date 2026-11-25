@@ -32,6 +32,7 @@ class VoiceParseService
         'aur', 'and', 'plus', 'ka', 'ki', 'ke', 'ko', 'se', 'me', 'mein', 'par', 'pe',
         'de', 'do', 'dena', 'dijiye', 'likh', 'likho', 'likhdo', 'add', 'karo', 'kar',
         'kardo', 'ek', 'teen', 'char', 'chaar', 'paanch', 'panch', 'chhe', 'chhah', 'che',
+        'or', 'ya', 'yaa', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
         'saat', 'aath', 'nau', 'das', 'bees', 'pachas', 'sau', 'dedh', 'dhai', 'aadha', 'adha',
         'kilo', 'kg', 'gram', 'gm', 'packet', 'pack', 'pcs', 'pc', 'piece', 'pieces',
         'litre', 'liter', 'ltr', 'ml', 'dozen', 'darjan', 'box', 'plate', 'bori', 'quintal',
@@ -39,7 +40,7 @@ class VoiceParseService
         'udhaar', 'udhar', 'credit', 'cash', 'upi', 'card', 'baaki', 'baki', 'naam',
         'bhai', 'ji', 'sahab', 'sahib', 'please', 'plz', 'ok', 'bhej', 'bhejo', 'bill',
         'banao', 'bana', 'banaao', 'naya', 'new', 'aaj', 'today',
-        'का', 'की', 'के', 'को', 'से', 'में', 'पर', 'दो', 'देना', 'लिखो', 'लिख', 'और',
+        'का', 'की', 'के', 'को', 'से', 'में', 'पर', 'दो', 'देना', 'लिखो', 'लिख', 'और', 'या',
         'एक', 'तीन', 'चार', 'पांच', 'पाँच', 'छह', 'सात', 'आठ', 'नौ', 'दस', 'बीस',
         'पचास', 'सौ', 'डेढ़', 'ढाई', 'आधा', 'किलो', 'ग्राम', 'पैकेट', 'पीस', 'लीटर',
         'दर्जन', 'बॉक्स', 'रुपये', 'छूट', 'प्रतिशत', 'उधार', 'कैश', 'नकद', 'नाम',
@@ -59,9 +60,36 @@ class VoiceParseService
         'tel' => 'oil', 'oil' => 'oil', 'तेल' => 'oil',
         'sabun' => 'soap', 'soap' => 'soap', 'साबुन' => 'soap',
         'namak' => 'salt', 'salt' => 'salt', 'नमक' => 'salt',
-        'maggi' => 'maggi', 'मैगी' => 'maggi',
+        'maggi' => 'maggi', 'maggie' => 'maggi', 'magi' => 'maggi', 'मैगी' => 'maggi',
         'dal' => 'dal', 'daal' => 'dal', 'दाल' => 'dal',
-        'chai' => 'tea', 'tea' => 'tea', 'चाय' => 'tea',
+        'chai' => 'tea', 'chay' => 'tea', 'chaay' => 'tea', 'chae' => 'tea',
+        'tea' => 'tea', 'चाय' => 'tea', 'चाए' => 'tea',
+        'paratha' => 'prantha', 'parata' => 'prantha', 'parantha' => 'prantha',
+        'parontha' => 'prantha', 'prantha' => 'prantha', 'पराठा' => 'prantha', 'परांठा' => 'prantha',
+        'aalu' => 'aloo', 'aloo' => 'aloo', 'alu' => 'aloo', 'आलू' => 'aloo',
+        'gobi' => 'gobhi', 'gobhi' => 'gobhi', 'गोभी' => 'gobhi',
+        'matar' => 'mutter', 'mutter' => 'mutter', 'मटर' => 'mutter',
+        'chhole' => 'chole', 'chole' => 'chole', 'छोले' => 'chole',
+        'rajma' => 'rajma', 'राजमा' => 'rajma',
+        'kadhi' => 'kadhi', 'kadi' => 'kadhi', 'कढ़ी' => 'kadhi',
+        'thali' => 'thali', 'थाली' => 'thali',
+        'samosa' => 'samosa', 'samosha' => 'samosa', 'समोसा' => 'samosa',
+        'bhature' => 'bhature', 'bhatura' => 'bhature', 'भटूरे' => 'bhature',
+        'puri' => 'puri', 'poori' => 'puri', 'पूरी' => 'puri',
+        'roti' => 'roti', 'रोटी' => 'roti',
+        'naan' => 'naan', 'नान' => 'naan',
+        'momo' => 'momo', 'momos' => 'momo', 'मोमो' => 'momo', 'मोमोज़' => 'momo',
+        'chowmein' => 'chowmein', 'chowmin' => 'chowmein', 'chow' => 'chowmein', 'चाउमीन' => 'chowmein',
+        'noodels' => 'noodles', 'noodles' => 'noodles', 'नूडल्स' => 'noodles',
+        'manchurian' => 'manchurian', 'मंचूरियन' => 'manchurian',
+        'burger' => 'burger', 'बर्गर' => 'burger',
+        'sandwich' => 'sandwich', 'सैंडविच' => 'sandwich',
+        'pasta' => 'pasta', 'पास्ता' => 'pasta',
+        'soup' => 'soup', 'सूप' => 'soup',
+        'fries' => 'french', 'frenchfries' => 'french', 'फ्रेंच फ्राइज़' => 'french',
+        'lassi' => 'lassi', 'लस्सी' => 'lassi',
+        'raita' => 'raita', 'रायता' => 'raita',
+        'shake' => 'shake', 'शेक' => 'shake',
         'biscuit' => 'biscuit', 'बिस्किट' => 'biscuit',
         'masala' => 'masala', 'मसाला' => 'masala',
         'ghee' => 'ghee', 'घी' => 'ghee',
@@ -172,6 +200,7 @@ class VoiceParseService
     {
         $normalized = Str::lower(trim($transcript));
         $normalized = preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $normalized) ?? '';
+        $normalized = preg_replace('/(?<=\d)(?=\p{L})|(?<=\p{L})(?=\d)/u', ' ', $normalized) ?? '';
         $tokens = preg_split('/\s+/u', $normalized, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
         $terms = [];
@@ -333,6 +362,10 @@ class VoiceParseService
             /** @var Product|null $product */
             $product = $uuid !== '' ? $byUuid->get($uuid) : null;
 
+            if (! $product && $spokenName !== '') {
+                $product = $this->matchCatalogProduct($spokenName, $shopId);
+            }
+
             if ($product) {
                 $key = $product->uuid;
                 $item = new VoiceParseItemDTO(
@@ -433,13 +466,136 @@ class VoiceParseService
         );
     }
 
+    /**
+     * Deterministically resolve a spoken name that the model left unmatched.
+     * Example: "chai" -> catalog product "Tea" via PRODUCT_ALIASES.
+     */
+    private function matchCatalogProduct(string $spokenName, int $shopId): ?Product
+    {
+        $normalized = $this->normalizeProductText($spokenName);
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        $tokens = array_values(array_filter(
+            explode(' ', $normalized),
+            fn (string $token) => mb_strlen($token) >= 2
+                && ! in_array($token, self::STOPWORDS, true)
+                && preg_match('/^[\d.,]+$/u', $token) !== 1
+        ));
+
+        if ($tokens === []) {
+            return null;
+        }
+
+        $terms = [];
+
+        foreach ($tokens as $token) {
+            $terms[] = $token;
+
+            if (isset(self::PRODUCT_ALIASES[$token])) {
+                $terms[] = self::PRODUCT_ALIASES[$token];
+            }
+        }
+
+        $terms = array_values(array_unique($terms));
+        $scored = [];
+
+        foreach ($terms as $term) {
+            foreach ($this->productRepository->search($term, $shopId, 10) as $product) {
+                $score = $this->scoreProductMatch($product->name, $normalized, $tokens, $terms);
+
+                if ($score <= 0) {
+                    continue;
+                }
+
+                $uuid = $product->uuid;
+
+                if (! isset($scored[$uuid]) || $scored[$uuid]['score'] < $score) {
+                    $scored[$uuid] = ['product' => $product, 'score' => $score];
+                }
+            }
+        }
+
+        if ($scored === []) {
+            return null;
+        }
+
+        $ranked = array_values($scored);
+        usort($ranked, fn (array $a, array $b) => $b['score'] <=> $a['score']);
+
+        $best = $ranked[0];
+
+        if ($best['score'] < 50) {
+            return null;
+        }
+
+        if (isset($ranked[1]) && ($best['score'] - $ranked[1]['score']) < 10) {
+            return null;
+        }
+
+        Log::info('Voice item resolved from catalog aliases', [
+            'spoken_name' => $spokenName,
+            'product' => $best['product']->name,
+            'score' => $best['score'],
+        ]);
+
+        return $best['product'];
+    }
+
+    /**
+     * @param  string[]  $tokens
+     * @param  string[]  $terms
+     */
+    private function scoreProductMatch(string $productName, string $spokenName, array $tokens, array $terms): float
+    {
+        $productName = $this->normalizeProductText($productName);
+        $productTokens = explode(' ', $productName);
+        $score = 0.0;
+
+        foreach ($terms as $term) {
+            if ($productName === $term) {
+                $score += 100;
+            } elseif (in_array($term, $productTokens, true)) {
+                $score += 60;
+            } elseif (str_contains($productName, $term)) {
+                $score += 40;
+            }
+        }
+
+        if ($productName === $spokenName) {
+            $score += 100;
+        }
+
+        foreach ($tokens as $token) {
+            if (in_array($token, $productTokens, true)) {
+                $score += 20;
+            } elseif (str_contains($productName, $token)) {
+                $score += 10;
+            }
+        }
+
+        return $score - (mb_strlen($productName) * 0.1);
+    }
+
+    private function normalizeProductText(string $value): string
+    {
+        $normalized = Str::lower(trim($value));
+        $normalized = preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $normalized) ?? '';
+        $normalized = preg_replace('/(?<=\d)(?=\p{L})|(?<=\p{L})(?=\d)/u', ' ', $normalized) ?? '';
+        $normalized = preg_replace('/\s+/u', ' ', $normalized) ?? '';
+
+        return trim($normalized);
+    }
+
     private function systemPrompt(): string
     {
         return <<<'PROMPT'
 You are a billing assistant for an Indian kirana (grocery) store. A shopkeeper speaks a bill in Hindi, Hinglish or English. Convert it into a structured bill draft using ONLY the catalog items provided by the user.
 
 Rules:
-1. Match each spoken product to the closest catalog item. Match phonetically and semantically across scripts (e.g. "आटा" or "aata" -> an Atta product, "मैगी" -> Maggi). Never match unrelated items.
+1. Match each spoken product to the closest catalog item, even when the catalog name is in a different language, script or spelling. The shopkeeper may speak Hindi, Hinglish or English, so treat translations, transliterations and common synonyms as the same item. Examples: "chai"/"चाय" -> Tea, "paratha"/"parata"/"prantha"/"पराठा" -> a Prantha item, "aata"/"आटा" -> Atta, "doodh"/"दूध" -> Milk, "aloo"/"aalu"/"आलू" -> Aloo, "maggie"/"maggi"/"मैगी" -> Maggie, "noodles"/"नूडल्स" -> Noodles. Prefer the catalog item that shares the core word over a vaguely similar item. Never match unrelated items. Only leave product_uuid empty when no catalog item is even related.
 2. Copy product_uuid exactly from the catalog. If nothing in the catalog reasonably matches, set product_uuid to an empty string and put the shopkeeper's words in spoken_name.
 3. Never invent prices. The server takes prices and units from the catalog; you only decide quantity, unit hint and spoken_name.
 4. Convert spoken quantities to numbers: ek=1, do=2, teen=3, char/chaar=4, paanch=5, chhe=6, saat=7, aath=8, nau=9, das=10, dedh=1.5, dhai=2.5, aadha=0.5, sau=100. Understand units: kilo/kg, gram/gm, packet, piece/pcs, litre/ltr, ml, dozen/darjan. If no unit is spoken, use the catalog unit.

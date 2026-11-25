@@ -29,6 +29,7 @@ class RestaurantMenuSeeder extends Seeder
             [
                 'user_id' => $owner->id,
                 'owner_name' => 'Amit Kumar Sikwal',
+                'phone' => $ownerPhone,
                 'address' => 'Society Area Clement Town behind Sakshi Electrical Dehradun',
                 'city' => 'Dehradun',
                 'state' => 'Uttarakhand',
