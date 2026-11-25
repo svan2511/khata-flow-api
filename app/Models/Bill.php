@@ -103,10 +103,12 @@ class Bill extends Model
 
     public function scopeSearch($query, string $term)
     {
-        return $query->where(function ($q) use ($term) {
-            $q->where('bill_number', 'like', "%{$term}%")
-                ->orWhereHas('customer', fn ($q) => $q->where('name', 'like', "%{$term}%")
-                    ->orWhere('phone', 'like', "%{$term}%")
+        $pattern = '%'.Str::lower(trim($term)).'%';
+
+        return $query->where(function ($q) use ($pattern) {
+            $q->whereRaw('LOWER(bill_number) LIKE ?', [$pattern])
+                ->orWhereHas('customer', fn ($q) => $q->whereRaw('LOWER(name) LIKE ?', [$pattern])
+                    ->orWhereRaw('LOWER(phone) LIKE ?', [$pattern])
                 );
         });
     }

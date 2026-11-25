@@ -388,6 +388,59 @@ class ApiTest extends TestCase
             ->assertJsonPath('message', 'Another customer with this phone number already exists.');
     }
 
+    public function test_product_search_is_case_insensitive(): void
+    {
+        $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);
+        $shop = Shop::factory()->create(['user_id' => $user->id]);
+        $product = Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'White Sauce Pasta',
+        ]);
+        Passport::actingAs($user);
+
+        foreach (['white sauce pasta', 'WHITE SAUCE PASTA', 'White Sauce Pasta'] as $term) {
+            $this->getJson('/api/products/search?q='.urlencode($term).'&limit=10')
+                ->assertStatus(200)
+                ->assertJsonPath('data.0.id', $product->uuid)
+                ->assertJsonPath('data.0.name', 'White Sauce Pasta');
+        }
+    }
+
+    public function test_inventory_product_list_search_is_case_insensitive(): void
+    {
+        $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);
+        $shop = Shop::factory()->create(['user_id' => $user->id]);
+        $product = Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'White Sauce Pasta',
+        ]);
+        Passport::actingAs($user);
+
+        $this->getJson('/api/products?search='.urlencode('white sauce pasta'))
+            ->assertStatus(200)
+            ->assertJsonPath('data.0.id', $product->uuid)
+            ->assertJsonPath('data.0.name', 'White Sauce Pasta');
+    }
+
+    public function test_customer_search_is_case_insensitive(): void
+    {
+        $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);
+        $shop = Shop::factory()->create(['user_id' => $user->id]);
+        $customer = Customer::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'Ramesh Kumar',
+            'phone' => '9876543210',
+        ]);
+        Passport::actingAs($user);
+
+        foreach (['ramesh', 'RAMESH', 'Ramesh Kumar'] as $term) {
+            $this->getJson('/api/customers/search?q='.urlencode($term).'&limit=10')
+                ->assertStatus(200)
+                ->assertJsonPath('data.0.id', $customer->uuid)
+                ->assertJsonPath('data.0.name', 'Ramesh Kumar');
+        }
+    }
+
     public function test_unknown_api_route_returns_json_not_html(): void
     {
         $user = User::factory()->create(['phone' => $this->phone, 'phone_verified_at' => now()]);

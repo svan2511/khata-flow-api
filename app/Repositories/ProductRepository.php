@@ -7,6 +7,7 @@ use App\Repositories\Contracts\ProductRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class ProductRepository implements ProductRepositoryInterface
 {
@@ -47,22 +48,26 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function search(string $term, int $shopId, int $limit = 20): Collection
     {
-        $version = (int) Cache::get("product:version:{$shopId}", 0);
-        $cacheKey = "product:search:{$shopId}:{$version}:{$term}:{$limit}";
+        $term = trim($term);
+        $normalized = Str::lower($term);
+        $pattern = "%{$normalized}%";
 
-        return Cache::remember($cacheKey, 60, function () use ($term, $shopId, $limit) {
+        $version = (int) Cache::get("product:version:{$shopId}", 0);
+        $cacheKey = "product:search:{$shopId}:{$version}:{$normalized}:{$limit}";
+
+        return Cache::remember($cacheKey, 60, function () use ($normalized, $pattern, $shopId, $limit) {
             return Product::byShop($shopId)
                 ->active()
-                ->where(function ($query) use ($term) {
-                    $query->where('name', 'like', "%{$term}%")
-                        ->orWhere('barcode', 'like', "%{$term}%")
-                        ->orWhere('sku', 'like', "%{$term}%");
+                ->where(function ($query) use ($pattern) {
+                    $query->whereRaw('LOWER(name) LIKE ?', [$pattern])
+                        ->orWhereRaw('LOWER(barcode) LIKE ?', [$pattern])
+                        ->orWhereRaw('LOWER(sku) LIKE ?', [$pattern]);
                 })
                 ->orderByRaw('CASE
-                    WHEN barcode = ? THEN 0
-                    WHEN name LIKE ? THEN 1
+                    WHEN LOWER(barcode) = ? THEN 0
+                    WHEN LOWER(name) LIKE ? THEN 1
                     ELSE 2
-                END', [$term, "{$term}%"])
+                END', [$normalized, "{$normalized}%"])
                 ->orderBy('name')
                 ->limit($limit)
                 ->get();
@@ -76,11 +81,11 @@ class ProductRepository implements ProductRepositoryInterface
             ->orderBy('name');
 
         if (! empty($filters['search'])) {
-            $term = $filters['search'];
-            $query->where(function ($q) use ($term) {
-                $q->where('name', 'like', "%{$term}%")
-                    ->orWhere('barcode', 'like', "%{$term}%")
-                    ->orWhere('sku', 'like', "%{$term}%");
+            $pattern = '%'.Str::lower(trim((string) $filters['search'])).'%';
+            $query->where(function ($q) use ($pattern) {
+                $q->whereRaw('LOWER(name) LIKE ?', [$pattern])
+                    ->orWhereRaw('LOWER(barcode) LIKE ?', [$pattern])
+                    ->orWhereRaw('LOWER(sku) LIKE ?', [$pattern]);
             });
         }
 
