@@ -204,7 +204,7 @@ class VoiceParseTest extends TestCase
             ],
         ]));
 
-        $response = $this->postJson('/api/voice/parse', ['transcript' => 'do chai']);
+        $response = $this->postJson('/api/voice/parse', ['transcript' => 'do chai aur ek gud']);
 
         $response->assertStatus(200)
             ->assertJsonPath('data.items.0.product_uuid', $tea->uuid)
@@ -262,6 +262,62 @@ class VoiceParseTest extends TestCase
             ->assertJsonPath('data.items.1.product_uuid', $prantha->uuid)
             ->assertJsonPath('data.items.1.name', 'Aloo Prantha')
             ->assertJsonPath('data.items.1.quantity', 2);
+    }
+
+    public function test_voice_parse_resolves_full_catalog_bill_without_gemini(): void
+    {
+        [$user, $shop] = $this->makeShop();
+        Passport::actingAs($user);
+
+        $tea = Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'Tea',
+            'price' => 20,
+            'unit' => 'cup',
+        ]);
+
+        $prantha = Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'Aaloo Piyaj Prantha',
+            'price' => 50,
+            'unit' => 'plate',
+        ]);
+
+        $pasta = Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'White Sauce Pasta',
+            'price' => 180,
+            'unit' => 'plate',
+        ]);
+
+        Product::factory()->create([
+            'shop_id' => $shop->id,
+            'name' => 'Aloo Prantha',
+            'price' => 40,
+            'unit' => 'plate',
+        ]);
+
+        Http::fake();
+
+        $response = $this->postJson('/api/voice/parse', [
+            'transcript' => '2 alu pyaz paratha, ek tea or ek white sauce pasta',
+            'language' => 'hi',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.source', 'catalog')
+            ->assertJsonCount(3, 'data.items')
+            ->assertJsonPath('data.items.0.product_uuid', $prantha->uuid)
+            ->assertJsonPath('data.items.0.quantity', 2)
+            ->assertJsonPath('data.items.1.product_uuid', $tea->uuid)
+            ->assertJsonPath('data.items.1.quantity', 1)
+            ->assertJsonPath('data.items.2.product_uuid', $pasta->uuid)
+            ->assertJsonPath('data.items.2.quantity', 1);
+
+        $this->assertEquals(50.0, $response->json('data.items.0.price'));
+        $this->assertEquals(180.0, $response->json('data.items.2.price'));
+
+        Http::assertNothingSent();
     }
 
     public function test_voice_parse_merges_duplicate_catalog_items(): void
@@ -373,7 +429,7 @@ class VoiceParseTest extends TestCase
 
         $product = Product::factory()->create([
             'shop_id' => $shop->id,
-            'name' => 'Aashirvaad Atta 5kg',
+            'name' => 'Parle-G Biscuit',
             'price' => 250,
             'unit' => 'kg',
         ]);

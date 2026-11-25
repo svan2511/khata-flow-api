@@ -19,6 +19,15 @@ class ProductRepository implements ProductRepositoryInterface
             ->first();
     }
 
+    public function allActive(int $shopId, int $limit = 2000): Collection
+    {
+        return Product::byShop($shopId)
+            ->active()
+            ->orderBy('name')
+            ->limit($limit)
+            ->get();
+    }
+
     public function create(array $data): Product
     {
         return Product::create($data);

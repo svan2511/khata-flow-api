@@ -6,6 +6,7 @@ use App\DTOs\VoiceParseDTO;
 use App\DTOs\VoiceParseItemDTO;
 use App\DTOs\VoiceParseResultDTO;
 use App\Exceptions\VoiceParseException;
+use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\User;
@@ -48,6 +49,60 @@ class VoiceParseService
     ];
 
     /**
+     * Spoken number words (Hindi/Hinglish/English) mapped to numeric values.
+     *
+     * @var array<string, float>
+     */
+    private const NUMBER_WORDS = [
+        'ek' => 1, 'ik' => 1, 'one' => 1, 'एक' => 1,
+        'do' => 2, 'two' => 2, 'दो' => 2,
+        'teen' => 3, 'tin' => 3, 'three' => 3, 'तीन' => 3,
+        'char' => 4, 'chaar' => 4, 'four' => 4, 'चार' => 4,
+        'paanch' => 5, 'panch' => 5, 'five' => 5, 'पांच' => 5, 'पाँच' => 5,
+        'chhe' => 6, 'chhah' => 6, 'che' => 6, 'six' => 6, 'छह' => 6,
+        'saat' => 7, 'seven' => 7, 'सात' => 7,
+        'aath' => 8, 'eight' => 8, 'आठ' => 8,
+        'nau' => 9, 'nine' => 9, 'नौ' => 9,
+        'das' => 10, 'ten' => 10, 'दस' => 10,
+        'bees' => 20, 'twenty' => 20, 'बीस' => 20,
+        'pachas' => 50, 'पचास' => 50,
+        'sau' => 100, 'hundred' => 100, 'सौ' => 100,
+        'dedh' => 1.5, 'डेढ़' => 1.5,
+        'dhai' => 2.5, 'ढाई' => 2.5,
+        'aadha' => 0.5, 'adha' => 0.5, 'आधा' => 0.5,
+    ];
+
+    /**
+     * Spoken unit words, ignored while matching products to a run.
+     *
+     * @var array<string, string>
+     */
+    private const UNIT_WORDS = [
+        'kg' => 'kg', 'kgs' => 'kg', 'kilo' => 'kg', 'kilos' => 'kg', 'kilogram' => 'kg', 'किलो' => 'kg',
+        'g' => 'g', 'gm' => 'g', 'gms' => 'g', 'gram' => 'g', 'grams' => 'g', 'ग्राम' => 'g',
+        'l' => 'l', 'ltr' => 'l', 'litre' => 'l', 'liter' => 'l', 'litres' => 'l', 'liters' => 'l', 'लीटर' => 'l',
+        'ml' => 'ml', 'एमएल' => 'ml',
+        'packet' => 'packet', 'packets' => 'packet', 'pack' => 'packet', 'packs' => 'packet', 'पैकेट' => 'packet',
+        'piece' => 'piece', 'pieces' => 'piece', 'pc' => 'piece', 'pcs' => 'piece', 'nag' => 'piece',
+        'पीस' => 'piece', 'नग' => 'piece',
+        'dozen' => 'dozen', 'darjan' => 'dozen', 'दर्जन' => 'dozen',
+        'bottle' => 'bottle', 'bottles' => 'bottle', 'बोतल' => 'bottle',
+        'box' => 'box', 'boxes' => 'box', 'डिब्बा' => 'box',
+        'plate' => 'plate', 'plates' => 'plate', 'प्लेट' => 'plate',
+        'cup' => 'cup', 'cups' => 'cup', 'कप' => 'cup',
+        'glass' => 'glass', 'गिलास' => 'glass',
+    ];
+
+    /**
+     * Words that end the current item run when spoken between items.
+     *
+     * @var string[]
+     */
+    private const SEGMENT_SEPARATORS = [
+        'aur', 'and', 'or', 'ya', 'yaa', 'plus', 'with', 'saath', 'और', 'या',
+    ];
+
+    /**
      * Hindi/Hinglish words mapped to catalog-friendly search terms.
      *
      * @var array<string, string>
@@ -66,7 +121,8 @@ class VoiceParseService
         'tea' => 'tea', 'चाय' => 'tea', 'चाए' => 'tea',
         'paratha' => 'prantha', 'parata' => 'prantha', 'parantha' => 'prantha',
         'parontha' => 'prantha', 'prantha' => 'prantha', 'पराठा' => 'prantha', 'परांठा' => 'prantha',
-        'aalu' => 'aloo', 'aloo' => 'aloo', 'alu' => 'aloo', 'आलू' => 'aloo',
+        'aalu' => 'aloo', 'aloo' => 'aloo', 'alu' => 'aloo', 'aaloo' => 'aloo', 'आलू' => 'aloo',
+        'pyaz' => 'piyaj', 'pyaaz' => 'piyaj', 'piyaz' => 'piyaj', 'piyaj' => 'piyaj', 'प्याज' => 'piyaj',
         'gobi' => 'gobhi', 'gobhi' => 'gobhi', 'गोभी' => 'gobhi',
         'matar' => 'mutter', 'mutter' => 'mutter', 'मटर' => 'mutter',
         'chhole' => 'chole', 'chole' => 'chole', 'छोले' => 'chole',
@@ -145,6 +201,19 @@ class VoiceParseService
             throw new VoiceParseException('Shop not found. Please setup your shop first.');
         }
 
+        $catalogResult = $this->parseFromCatalog($dto, $shop);
+
+        if ($catalogResult !== null) {
+            Log::info('Voice bill parsed from catalog', [
+                'shop_id' => $shop->id,
+                'items' => count($catalogResult->items),
+                'payment_method' => $catalogResult->paymentMethod,
+                'duration_ms' => (int) ((microtime(true) - $startedAt) * 1000),
+            ]);
+
+            return $catalogResult;
+        }
+
         $apiKey = (string) config('services.gemini.key');
 
         if ($apiKey === '') {
@@ -165,6 +234,428 @@ class VoiceParseService
         ]);
 
         return $result;
+    }
+
+    /**
+     * Resolve a transcript against the full shop catalog without calling Gemini.
+     * Only returns a result when every spoken item maps to a catalog product.
+     */
+    private function parseFromCatalog(VoiceParseDTO $dto, Shop $shop): ?VoiceParseResultDTO
+    {
+        $tokens = $this->spokenTokens($dto->transcript);
+
+        if ($tokens === []) {
+            return null;
+        }
+
+        $customer = $this->detectCustomer($tokens, $shop->id);
+        $customerTokens = $customer
+            ? explode(' ', $this->normalizeProductText((string) $customer->name))
+            : [];
+
+        $runs = $this->buildItemRuns($tokens, $customerTokens);
+
+        if ($runs === []) {
+            return null;
+        }
+
+        $products = $this->productRepository->allActive($shop->id);
+
+        if ($products->isEmpty()) {
+            return null;
+        }
+
+        $merged = [];
+
+        foreach ($runs as $run) {
+            $product = $this->matchProductForTokens($run['tokens'], $products);
+
+            if (! $product) {
+                return null;
+            }
+
+            $key = $product->uuid;
+
+            if (isset($merged[$key])) {
+                $merged[$key]['quantity'] = max(
+                    0.01,
+                    min(round($merged[$key]['quantity'] + $run['quantity'], 2), 999999)
+                );
+
+                continue;
+            }
+
+            $merged[$key] = [
+                'product' => $product,
+                'quantity' => $run['quantity'],
+                'spoken_name' => implode(' ', $run['tokens']),
+            ];
+        }
+
+        $items = [];
+
+        foreach ($merged as $entry) {
+            /** @var Product $product */
+            $product = $entry['product'];
+
+            $items[] = new VoiceParseItemDTO(
+                productUuid: $product->uuid,
+                name: $product->name,
+                price: (float) $product->price,
+                quantity: $entry['quantity'],
+                unit: $product->unit ?: self::DEFAULT_UNIT,
+                gstRate: 0.0,
+                confidence: 1.0,
+                resolved: true,
+                spokenName: $entry['spoken_name'],
+            );
+        }
+
+        if ($items === []) {
+            return null;
+        }
+
+        $count = count($items);
+
+        return new VoiceParseResultDTO(
+            items: $items,
+            customer: $customer ? [
+                'uuid' => $customer->uuid,
+                'name' => $customer->name,
+                'phone' => $customer->phone,
+            ] : null,
+            customerName: $customer?->name ?? '',
+            paymentMethod: $this->detectPaymentMethod($tokens),
+            discount: $this->detectBillDiscount($tokens),
+            notes: '',
+            assistantReply: $dto->language === 'en'
+                ? sprintf('%d item(s) added — check the review screen and confirm.', $count)
+                : sprintf('%d आइटम बिल में जोड़ दिए — रिव्यू स्क्रीन पर जांच कर बिल बनाएं।', $count),
+            source: 'catalog',
+        );
+    }
+
+    /**
+     * Lowercase and normalize spoken text into tokens.
+     *
+     * @return string[]
+     */
+    private function spokenTokens(string $transcript): array
+    {
+        $text = Str::lower(trim($transcript));
+        $text = strtr($text, [
+            '०' => '0', '१' => '1', '२' => '2', '३' => '3', '४' => '4',
+            '५' => '5', '६' => '6', '७' => '7', '८' => '8', '९' => '9',
+        ]);
+        $text = preg_replace('/[^\p{L}\p{N}\s.]+/u', ' ', $text) ?? '';
+        $text = preg_replace('/(?<=\d)(?=\p{L})|(?<=\p{L})(?=\d)/u', ' ', $text) ?? '';
+        $text = preg_replace('/\s+/u', ' ', $text) ?? '';
+        $tokens = preg_split('/\s+/u', trim($text), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        $result = [];
+
+        foreach ($tokens as $token) {
+            if ($token === '.') {
+                continue;
+            }
+
+            if (isset(self::NUMBER_WORDS[$token])) {
+                $result[] = (string) self::NUMBER_WORDS[$token];
+
+                continue;
+            }
+
+            $result[] = $token;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param  string[]  $tokens
+     */
+    private function detectCustomer(array $tokens, int $shopId): ?Customer
+    {
+        $text = ' '.implode(' ', $tokens).' ';
+        $seen = [];
+        $best = null;
+        $bestLength = 0;
+
+        foreach ($tokens as $token) {
+            if (mb_strlen($token) < 3
+                || isset($seen[$token])
+                || is_numeric($token)
+                || in_array($token, self::STOPWORDS, true)) {
+                continue;
+            }
+
+            $seen[$token] = true;
+
+            foreach ($this->customerRepository->search($token, $shopId, 10) as $customer) {
+                $name = $this->normalizeProductText((string) $customer->name);
+
+                if ($name === '') {
+                    continue;
+                }
+
+                foreach ([$name, explode(' ', $name)[0]] as $candidate) {
+                    if (mb_strlen($candidate) < 3 || ! str_contains($text, ' '.$candidate.' ')) {
+                        continue;
+                    }
+
+                    if (mb_strlen($candidate) > $bestLength) {
+                        $best = $customer;
+                        $bestLength = mb_strlen($candidate);
+                    }
+                }
+            }
+        }
+
+        return $best;
+    }
+
+    /**
+     * Split spoken tokens into item runs, attaching the preceding quantity.
+     *
+     * @param  string[]  $tokens
+     * @param  string[]  $customerTokens
+     * @return array<int, array{tokens: string[], quantity: float}>
+     */
+    private function buildItemRuns(array $tokens, array $customerTokens): array
+    {
+        $runs = [];
+        $current = [];
+        $quantity = 1.0;
+        $count = count($tokens);
+
+        for ($i = 0; $i < $count; $i++) {
+            $token = $tokens[$i];
+
+            if (in_array($token, $customerTokens, true)) {
+                continue;
+            }
+
+            if (is_numeric($token)) {
+                $value = round((float) $token, 2);
+
+                if ($current !== []) {
+                    $nextToken = $this->nextMeaningfulToken($tokens, $i + 1, $customerTokens);
+
+                    if ($nextToken !== null && ! is_numeric($nextToken)) {
+                        $runs[] = ['tokens' => $current, 'quantity' => $quantity];
+                        $current = [];
+                        $quantity = max(0.01, min($value, 999999));
+
+                        continue;
+                    }
+
+                    $runs[] = ['tokens' => $current, 'quantity' => max(0.01, min($value, 999999))];
+                    $current = [];
+                    $quantity = 1.0;
+
+                    continue;
+                }
+
+                $quantity = max(0.01, min($value, 999999));
+
+                continue;
+            }
+
+            if (in_array($token, self::SEGMENT_SEPARATORS, true)) {
+                if ($current !== []) {
+                    $runs[] = ['tokens' => $current, 'quantity' => $quantity];
+                    $current = [];
+                    $quantity = 1.0;
+                }
+
+                continue;
+            }
+
+            if (isset(self::UNIT_WORDS[$token]) || in_array($token, self::STOPWORDS, true)) {
+                continue;
+            }
+
+            $current[] = $token;
+        }
+
+        if ($current !== []) {
+            $runs[] = ['tokens' => $current, 'quantity' => $quantity];
+        }
+
+        return $runs;
+    }
+
+    /**
+     * @param  string[]  $tokens
+     * @param  string[]  $customerTokens
+     */
+    private function nextMeaningfulToken(array $tokens, int $offset, array $customerTokens): ?string
+    {
+        $count = count($tokens);
+
+        for ($i = $offset; $i < $count; $i++) {
+            $token = $tokens[$i];
+
+            if (in_array($token, $customerTokens, true)
+                || in_array($token, self::SEGMENT_SEPARATORS, true)
+                || isset(self::UNIT_WORDS[$token])
+                || in_array($token, self::STOPWORDS, true)) {
+                continue;
+            }
+
+            return $token;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  string[]  $runTokens
+     * @param  Collection<int, Product>  $products
+     */
+    private function matchProductForTokens(array $runTokens, Collection $products): ?Product
+    {
+        $spoken = implode(' ', $runTokens);
+        $terms = [];
+
+        foreach ($runTokens as $token) {
+            $terms[] = $token;
+
+            if (isset(self::PRODUCT_ALIASES[$token])) {
+                $terms[] = self::PRODUCT_ALIASES[$token];
+            }
+        }
+
+        $terms = array_values(array_unique($terms));
+        $scored = [];
+
+        foreach ($products as $product) {
+            $score = $this->scoreRunMatch((string) $product->name, $spoken, $terms);
+
+            if ($score > 0) {
+                $scored[] = ['product' => $product, 'score' => $score];
+            }
+        }
+
+        if ($scored === []) {
+            return null;
+        }
+
+        usort($scored, fn (array $a, array $b) => $b['score'] <=> $a['score']);
+
+        $best = $scored[0];
+        $exact = $this->normalizeProductText((string) $best['product']->name) === $spoken;
+
+        if ($best['score'] < 40) {
+            return null;
+        }
+
+        if (! $exact && isset($scored[1]) && ($best['score'] - $scored[1]['score']) < 8) {
+            return null;
+        }
+
+        return $best['product'];
+    }
+
+    /**
+     * @param  string[]  $terms
+     */
+    private function scoreRunMatch(string $productName, string $spoken, array $terms): float
+    {
+        $name = $this->normalizeProductText($productName);
+        $nameTokens = explode(' ', $name);
+        $score = $name === $spoken ? 200.0 : 0.0;
+        $matched = 0;
+
+        foreach ($terms as $term) {
+            $best = 0.0;
+
+            if ($name === $term) {
+                $score += 80;
+                $matched++;
+
+                continue;
+            }
+
+            foreach ($nameTokens as $nameToken) {
+                if ($nameToken === $term) {
+                    $best = max($best, 40);
+                } elseif ($this->isFuzzyTokenMatch($nameToken, $term)) {
+                    $best = max($best, 25);
+                } elseif (mb_strlen($term) >= 3 && mb_strlen($nameToken) >= 3
+                    && (str_contains($nameToken, $term) || str_contains($term, $nameToken))) {
+                    $best = max($best, 15);
+                }
+            }
+
+            if ($best > 0) {
+                $score += $best;
+                $matched++;
+            }
+        }
+
+        $score -= max(0, count($nameTokens) - $matched) * 2;
+        $score -= mb_strlen($name) * 0.1;
+
+        return $score;
+    }
+
+    private function isFuzzyTokenMatch(string $a, string $b): bool
+    {
+        if ($a === $b) {
+            return true;
+        }
+
+        if (mb_strlen($a) < 4 || mb_strlen($b) < 4) {
+            return false;
+        }
+
+        if (preg_match('/^[a-z0-9]+$/', $a) !== 1 || preg_match('/^[a-z0-9]+$/', $b) !== 1) {
+            return false;
+        }
+
+        return levenshtein($a, $b) <= 1;
+    }
+
+    /**
+     * @param  string[]  $tokens
+     */
+    private function detectPaymentMethod(array $tokens): string
+    {
+        $text = implode(' ', $tokens);
+
+        if (preg_match('/\b(udhaar|udhar|udhaari|udhari|credit|baaki|baki)\b|उधार|बाकी|उधारी/u', $text) === 1) {
+            return 'credit';
+        }
+
+        if (preg_match('/(\bupi\b|gpay|google pay|phonepe|paytm|online)|ऑनलाइन|यूपीआई/u', $text) === 1) {
+            return 'upi';
+        }
+
+        if (preg_match('/(\bcard\b|कार्ड)/u', $text) === 1) {
+            return 'card';
+        }
+
+        return 'cash';
+    }
+
+    /**
+     * @param  string[]  $tokens
+     * @return array{type: string, value: float}|null
+     */
+    private function detectBillDiscount(array $tokens): ?array
+    {
+        $text = implode(' ', $tokens);
+
+        if (preg_match('/(\d+(?:\.\d+)?)\s*(?:%|percent|pratishat|प्रतिशत)/u', $text, $matches) === 1) {
+            return ['type' => 'percentage', 'value' => min((float) $matches[1], 100.0)];
+        }
+
+        if (preg_match('/(\d+(?:\.\d+)?)\s*(?:rupaye|rupees|rs|रुपये)\s*(?:kam|chhoot|chhut|छूट)/u', $text, $matches) === 1) {
+            return ['type' => 'fixed', 'value' => (float) $matches[1]];
+        }
+
+        return null;
     }
 
     /**

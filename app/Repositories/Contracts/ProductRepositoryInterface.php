@@ -12,6 +12,8 @@ interface ProductRepositoryInterface
 
     public function search(string $term, int $shopId, int $limit = 20): Collection;
 
+    public function allActive(int $shopId, int $limit = 2000): Collection;
+
     public function create(array $data): Product;
 
     public function paginate(int $shopId, array $filters = []): LengthAwarePaginator;
